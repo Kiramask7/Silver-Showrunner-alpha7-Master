@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BaselineSpec",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "baseline_id": { "type": "string", "pattern": "^BL-" },
+    "name": { "type": "string", "minLength": 1 },
+    "source_type": { "enum": ["CALIBRATED_INSTRUMENT", "CONTROL_SAMPLE", "HISTORICAL_BASELINE", "OFFICIAL_REFERENCE", "OTHER"] },
+    "source_description": { "type": "string", "minLength": 1 },
+    "calibration_chain": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "control_sample": { "type": "string", "minLength": 1 },
+    "historical_baseline": { "type": "string", "minLength": 1 },
+    "observation_window": { "type": "object" },
+    "alternative_explanations": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "status": { "enum": ["PROPOSED", "USER_APPROVED", "VERIFIED"] },
+    "approval_event_id": { "type": ["string", "null"] }
+  },
+  "required": [
+    "baseline_id", "name", "source_type", "source_description", "calibration_chain", "control_sample",
+    "historical_baseline", "observation_window", "alternative_explanations", "evidence_ids", "status", "approval_event_id"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "USER_APPROVED" } }, "required": ["status"] },
+      "then": { "properties": { "approval_event_id": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "VERIFIED" } }, "required": ["status"] },
+      "then": { "properties": { "evidence_ids": { "minItems": 1 } } }
+    }
+  ]
+}

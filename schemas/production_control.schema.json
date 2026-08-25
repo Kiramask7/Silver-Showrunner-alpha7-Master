@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://silverartstudio.local/schemas/alpha7-master-production-control-v1.json",
+  "title": "Alpha.7 Master production control",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "project_id",
+    "production_validation",
+    "current_stage",
+    "dialogue_schedule",
+    "action_contracts",
+    "reference_roles",
+    "shot_handoffs",
+    "assets",
+    "progress",
+    "cost_ledger",
+    "attempt_budgets"
+  ],
+  "properties": {
+    "contract_version": {"const": "alpha7-master-production-control-v1"},
+    "project_id": {"type": "string", "minLength": 1},
+    "production_validation": {"const": "NOT_TESTED"},
+    "current_stage": {"type": "string", "minLength": 1},
+    "dialogue_schedule": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/dialogue"}
+    },
+    "action_contracts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/action"}
+    },
+    "reference_roles": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/referenceRole"}
+    },
+    "shot_handoffs": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/handoff"}
+    },
+    "assets": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/asset"}
+    },
+    "progress": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/progress"}
+    },
+    "cost_ledger": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/cost"}
+    },
+    "attempt_budgets": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/attemptBudget"}
+    }
+  },
+  "$defs": {
+    "nonEmpty": {"type": "string", "minLength": 1},
+    "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "dialogueFragment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fragment_id", "fragment_index", "shot_id", "start_offset", "end_offset",
+        "text", "start_ms", "end_ms", "delivery_mode", "bridge_from_previous",
+        "visual_purpose"
+      ],
+      "properties": {
+        "fragment_id": {"$ref": "#/$defs/nonEmpty"},
+        "fragment_index": {"type": "integer", "minimum": 0},
+        "shot_id": {"$ref": "#/$defs/nonEmpty"},
+        "start_offset": {"type": "integer", "minimum": 0},
+        "end_offset": {"type": "integer", "minimum": 1},
+        "text": {"$ref": "#/$defs/nonEmpty"},
+        "start_ms": {"type": "integer", "minimum": 0},
+        "end_ms": {"type": "integer", "minimum": 1},
+        "delivery_mode": {
+          "enum": ["ONSCREEN_LIP", "L_CUT", "VOICE_OVER", "AUDIO_POST_REQUIRED"]
+        },
+        "bridge_from_previous": {"type": "boolean"},
+        "visual_purpose": {"$ref": "#/$defs/nonEmpty"}
+      }
+    },
+    "dialogue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dialogue_id", "speaker", "verbatim_text", "source_ref", "speech_rate_cps",
+        "delivery_adjustment_ms", "minimum_duration_ms", "available_duration_ms",
+        "timing_basis", "timing_status", "fragments"
+      ],
+      "properties": {
+        "dialogue_id": {"$ref": "#/$defs/nonEmpty"},
+        "speaker": {"$ref": "#/$defs/nonEmpty"},
+        "verbatim_text": {"$ref": "#/$defs/nonEmpty"},
+        "source_ref": {"$ref": "#/$defs/nonEmpty"},
+        "speech_rate_cps": {"type": "number", "exclusiveMinimum": 0, "maximum": 5},
+        "delivery_adjustment_ms": {"type": "integer", "minimum": 0},
+        "minimum_duration_ms": {"type": "integer", "minimum": 1},
+        "available_duration_ms": {"type": "integer", "minimum": 0},
+        "timing_basis": {"enum": ["COMPUTED", "MEASURED", "CONSERVATIVE_ESTIMATE", "NOT_RUN"]},
+        "timing_status": {"enum": ["FIT", "SPLIT_REQUIRED", "NOT_RUN"]},
+        "fragments": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/dialogueFragment"}}
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shot_id", "actor_or_object", "setup", "force_or_action", "contact_or_release",
+        "visible_consequence", "endpoint", "camera_task", "reference_tags"
+      ],
+      "properties": {
+        "shot_id": {"$ref": "#/$defs/nonEmpty"},
+        "actor_or_object": {"$ref": "#/$defs/nonEmpty"},
+        "setup": {"$ref": "#/$defs/nonEmpty"},
+        "force_or_action": {"$ref": "#/$defs/nonEmpty"},
+        "contact_or_release": {"$ref": "#/$defs/nonEmpty"},
+        "visible_consequence": {"$ref": "#/$defs/nonEmpty"},
+        "endpoint": {"$ref": "#/$defs/nonEmpty"},
+        "camera_task": {"$ref": "#/$defs/nonEmpty"},
+        "reference_tags": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}}
+      }
+    },
+    "referenceRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_id", "exact_tag", "media_type", "primary_role", "controls",
+        "forbidden_transfer", "rights_status", "source"
+      ],
+      "properties": {
+        "reference_id": {"$ref": "#/$defs/nonEmpty"},
+        "exact_tag": {"$ref": "#/$defs/nonEmpty"},
+        "media_type": {"enum": ["IMAGE", "VIDEO", "AUDIO", "FINAL_FRAME"]},
+        "primary_role": {
+          "enum": [
+            "IDENTITY", "COSTUME", "PRODUCT", "PROP", "ENVIRONMENT", "FIRST_FRAME",
+            "LAST_FRAME", "SOURCE_CLIP", "MOTION", "CAMERA", "TIMING", "BLOCKING",
+            "AMBIENCE", "AUDIO_TEMPO", "DIALOGUE_DELIVERY"
+          ]
+        },
+        "controls": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/nonEmpty"}},
+        "forbidden_transfer": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "rights_status": {"enum": ["OWNED", "LICENSED", "PUBLIC_DOMAIN", "AUTHORIZED", "UNKNOWN"]},
+        "source": {"$ref": "#/$defs/nonEmpty"}
+      }
+    },
+    "handoffAnchors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity_wardrobe", "position_screen_direction", "gaze_eyeline", "pose_action_phase",
+        "prop_ownership_contact", "mouth_hand_occupancy", "open_motion", "camera_axis_phase",
+        "lighting_state", "audio_state", "dialogue_cursor", "edit_boundary"
+      ],
+      "properties": {
+        "identity_wardrobe": {"$ref": "#/$defs/nonEmpty"},
+        "position_screen_direction": {"$ref": "#/$defs/nonEmpty"},
+        "gaze_eyeline": {"$ref": "#/$defs/nonEmpty"},
+        "pose_action_phase": {"$ref": "#/$defs/nonEmpty"},
+        "prop_ownership_contact": {"$ref": "#/$defs/nonEmpty"},
+        "mouth_hand_occupancy": {"$ref": "#/$defs/nonEmpty"},
+        "open_motion": {"$ref": "#/$defs/nonEmpty"},
+        "camera_axis_phase": {"$ref": "#/$defs/nonEmpty"},
+        "lighting_state": {"$ref": "#/$defs/nonEmpty"},
+        "audio_state": {"$ref": "#/$defs/nonEmpty"},
+        "dialogue_cursor": {"$ref": "#/$defs/nonEmpty"},
+        "edit_boundary": {"$ref": "#/$defs/nonEmpty"}
+      }
+    },
+    "handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boundary_id", "from_shot_id", "to_shot_id", "continuity_mode", "receiver_in",
+        "baton_out", "planned_end_state", "observed_end_state", "source_take_status",
+        "authoritative_end_state", "anchors", "reference_tags", "audio_bridge", "edit_type",
+        "fallback_cut"
+      ],
+      "properties": {
+        "boundary_id": {"$ref": "#/$defs/nonEmpty"},
+        "from_shot_id": {"$ref": "#/$defs/nonEmpty"},
+        "to_shot_id": {"$ref": "#/$defs/nonEmpty"},
+        "continuity_mode": {"enum": ["EDITABLE_CUT", "SEAMLESS_CONTINUATION", "INTENTIONAL_NEXT_SHOT", "REANCHOR"]},
+        "receiver_in": {"$ref": "#/$defs/nonEmpty"},
+        "baton_out": {"$ref": "#/$defs/nonEmpty"},
+        "planned_end_state": {"$ref": "#/$defs/nonEmpty"},
+        "observed_end_state": {"type": ["string", "null"]},
+        "source_take_status": {"enum": ["NO_MEDIA", "ACCEPTED", "REJECTED"]},
+        "authoritative_end_state": {"enum": ["PLANNED", "OBSERVED_ACCEPTED"]},
+        "anchors": {"$ref": "#/$defs/handoffAnchors"},
+        "reference_tags": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "audio_bridge": {"$ref": "#/$defs/nonEmpty"},
+        "edit_type": {"$ref": "#/$defs/nonEmpty"},
+        "fallback_cut": {"$ref": "#/$defs/nonEmpty"}
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id", "name", "kind", "version", "source_level", "rights_status", "status",
+        "use_scope", "file_path", "sha256", "evidence", "updated_at"
+      ],
+      "properties": {
+        "asset_id": {"$ref": "#/$defs/nonEmpty"},
+        "name": {"$ref": "#/$defs/nonEmpty"},
+        "kind": {"$ref": "#/$defs/nonEmpty"},
+        "version": {"$ref": "#/$defs/nonEmpty"},
+        "source_level": {"enum": ["SOURCE_LOCKED", "USER_APPROVED", "DIRECTOR_PROPOSAL", "GENERATED_OUTPUT"]},
+        "rights_status": {"enum": ["OWNED", "LICENSED", "PUBLIC_DOMAIN", "AUTHORIZED", "UNKNOWN"]},
+        "status": {"enum": ["PLANNED", "PROPOSED", "APPROVED", "GENERATED_UNREVIEWED", "ACCEPTED", "REJECTED", "BLOCKED", "EXCLUDED_BY_USER"]},
+        "use_scope": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "file_path": {"type": ["string", "null"]},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "updated_at": {"$ref": "#/$defs/nonEmpty"}
+      }
+    },
+    "progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage_id", "name", "status", "completion_evidence", "blocker", "resume_from"],
+      "properties": {
+        "stage_id": {"$ref": "#/$defs/nonEmpty"},
+        "name": {"$ref": "#/$defs/nonEmpty"},
+        "status": {"enum": ["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "COMPLETE"]},
+        "completion_evidence": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "blocker": {"type": ["string", "null"]},
+        "resume_from": {"$ref": "#/$defs/nonEmpty"}
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cost_id", "scope", "kind", "currency", "amount", "basis", "evidence", "verified_at"],
+      "properties": {
+        "cost_id": {"$ref": "#/$defs/nonEmpty"},
+        "scope": {"$ref": "#/$defs/nonEmpty"},
+        "kind": {"enum": ["ESTIMATE", "ACTUAL"]},
+        "currency": {"$ref": "#/$defs/nonEmpty"},
+        "amount": {"type": "number", "minimum": 0},
+        "basis": {"$ref": "#/$defs/nonEmpty"},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/nonEmpty"}},
+        "verified_at": {"type": ["string", "null"]}
+      }
+    },
+    "attemptBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shot_id", "max_attempts", "used_attempts", "retry_policy", "stop_condition", "external_paid", "user_approved"],
+      "properties": {
+        "shot_id": {"$ref": "#/$defs/nonEmpty"},
+        "max_attempts": {"type": "integer", "minimum": 1},
+        "used_attempts": {"type": "integer", "minimum": 0},
+        "retry_policy": {"const": "ONE_VARIABLE"},
+        "stop_condition": {"$ref": "#/$defs/nonEmpty"},
+        "external_paid": {"type": "boolean"},
+        "user_approved": {"type": "boolean"}
+      }
+    }
+  }
+}

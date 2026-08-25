@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StateCleanup",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "audit_status": { "const": "EXECUTED" },
+    "history_completeness": { "const": "COMPLETE" },
+    "validation_attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "attempt_id": { "type": "string", "pattern": "^VA-" },
+          "sequence": { "type": "integer", "minimum": 1 },
+          "layer": { "enum": ["STRUCTURE", "INVARIANT", "FULL", "PACKAGE"] },
+          "outcome": { "enum": ["REJECTED", "PASSED"] },
+          "violation_ids": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_.:-]*$" }, "uniqueItems": true },
+          "messages": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "subject_digest": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+          "checked_at": { "type": "string", "minLength": 1 }
+        },
+        "required": ["attempt_id", "sequence", "layer", "outcome", "violation_ids", "messages", "subject_digest", "checked_at"]
+      }
+    },
+    "correction_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "correction_id": { "type": "string", "pattern": "^VC-" },
+          "violation_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_.:-]*$" },
+          "rejected_attempt_id": { "type": "string", "pattern": "^VA-" },
+          "verified_by_attempt_id": { "type": "string", "pattern": "^VA-" },
+          "summary": { "type": "string", "minLength": 1 }
+        },
+        "required": ["correction_id", "violation_id", "rejected_attempt_id", "verified_by_attempt_id", "summary"]
+      }
+    },
+    "unresolved_violation_ids": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_.:-]*$" }, "uniqueItems": true },
+    "final_validation_attempt_id": { "type": "string", "pattern": "^VA-" },
+    "checked_at": { "type": ["string", "null"] }
+  },
+  "required": [
+    "audit_status", "history_completeness", "validation_attempts", "correction_records",
+    "unresolved_violation_ids", "final_validation_attempt_id", "checked_at"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "audit_status": { "const": "EXECUTED" } }, "required": ["audit_status"] },
+      "then": { "properties": { "checked_at": { "type": "string", "minLength": 1 } } }
+    }
+  ]
+}

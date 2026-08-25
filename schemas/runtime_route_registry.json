@@ -1,0 +1,1663 @@
+{
+  "schema_version": "alpha7-master-runtime-route-registry-v1",
+  "classification_enum": [
+    "BOOTSTRAP",
+    "TASK_REQUIRED",
+    "TRIGGERED",
+    "TOOL_ONLY",
+    "AUDIT_ONLY"
+  ],
+  "read_mode_contract": {
+    "mode": "MODULAR_ONLY",
+    "manifest_key": "read_mode",
+    "entry_marker_file": "00_READ_ME_FIRST.md",
+    "entry_marker": "SILVER_SHOWRUNNER_READ_MODE: MODULAR_ONLY",
+    "onefile_marker": "SILVER_SHOWRUNNER_READ_MODE: ONEFILE_ONLY",
+    "onefile_guard_marker": "DO_NOT_LOAD_SOURCE_MODULES_WITH_THIS_ONEFILE: true",
+    "conflict_error": "E_READ_MODE_CONFLICT"
+  },
+  "budget_policy": {
+    "minimum_host_reserve_ratio": 0.25,
+    "within_status": "WITHIN_BUDGET",
+    "overflow_status": "SPLIT_REQUIRED",
+    "capability_policy": "PRESERVE_SELECTED_CAPABILITIES",
+    "unknown_profile_fallback": "RESTRICTED",
+    "profiles": {
+      "RESTRICTED": {
+        "context_window_tokens": 32000,
+        "input_cap_tokens": 8000,
+        "rule_cap_tokens": 3500,
+        "source_state_cap_tokens": 4500,
+        "output_reserve_tokens": 2500
+      },
+      "STANDARD": {
+        "context_window_tokens": 64000,
+        "input_cap_tokens": 16000,
+        "rule_cap_tokens": 6000,
+        "source_state_cap_tokens": 10000,
+        "output_reserve_tokens": 5000
+      },
+      "ENHANCED": {
+        "context_window_tokens": 128000,
+        "input_cap_tokens": 32000,
+        "rule_cap_tokens": 10000,
+        "source_state_cap_tokens": 22000,
+        "output_reserve_tokens": 10000
+      }
+    }
+  },
+  "routing": {
+    "delivery_modes": [
+      "MEDIA_ENABLED",
+      "TEXT_ONLY_ECO_TEST"
+    ],
+    "flag_catalog": [
+      "current_facts",
+      "minors",
+      "needs_director_source"
+    ],
+    "normal_selection_forbidden_prefixes": [
+      "scripts/",
+      "tests/",
+      "schemas/"
+    ],
+    "mode_constraints": {
+      "TEXT_ONLY_ECO_TEST": {
+        "required_tasks": [
+          "PROMPT"
+        ],
+        "required_project_types": [
+          "SERIES_LONGFORM"
+        ],
+        "forbidden_flags": [
+          "current_facts",
+          "needs_director_source"
+        ]
+      }
+    },
+    "route_rules": [
+      {
+        "rule_id": "ROUTE_TEXT_ONLY_ECO",
+        "priority": 0,
+        "exclusive": true,
+        "when": {
+          "delivery_modes": [
+            "TEXT_ONLY_ECO_TEST"
+          ],
+          "tasks": [
+            "PROMPT"
+          ],
+          "project_types": [
+            "SERIES_LONGFORM"
+          ],
+          "project_type_match": "ALL",
+          "flags_all": [],
+          "flags_none": [
+            "current_facts",
+            "needs_director_source"
+          ]
+        },
+        "include": [
+          "references/TEXT_ONLY_ECO_WORKFLOW.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_FACTUAL_PROJECT",
+        "priority": 10,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": "*",
+          "project_types": [
+            "DOCUMENTARY_NONFICTION",
+            "CULTURE_HERITAGE",
+            "SCIENCE_RESEARCH_EXPLAINER",
+            "EDUCATION_PUBLIC_INTEREST",
+            "BRAND_PRODUCT",
+            "HYBRID"
+          ],
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "references/ALPHA7_PROJECT_TYPE_AND_ORCHESTRATION.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_LONGFORM_BASE",
+        "priority": 20,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": "*",
+          "project_types": [
+            "SERIES_LONGFORM"
+          ],
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "references/ALPHA7_LONGFORM_CONTINUITY_ENGINE.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_PROMPT_DIRECTOR_SOURCE",
+        "priority": 30,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "PROMPT"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [
+            "needs_director_source"
+          ],
+          "flags_none": []
+        },
+        "include": [
+          "phases/10_DIRECTOR_FINE_STORYBOARD.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_DISCOVER",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "DISCOVER"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "02_FIRST_CONTACT_ROUTER_AND_MODES.md",
+          "phases/00_DISCOVER_PROJECT_BRIEF.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_GREENLIGHT",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "GREENLIGHT"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "phases/01_GREENLIGHT_MARKET_CREATIVE_DIRECTION.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_STORY",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "STORY"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "phases/02_STORY_ENGINE_SERIES_BIBLE.md",
+          "phases/04_SCRIPT_ROOM_ATTENTION_ARCHITECTURE.md",
+          "phases/05_DEVILS_REVIEW_SCRIPT_GATE.md",
+          "references/ALPHA7_CONTINUUM_CREATIVE_FIDELITY_ENGINE.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_NARRATIVE_COPYWRITING",
+        "priority": 45,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "STORY"
+          ],
+          "project_types": [
+            "NARRATIVE_SHORT",
+            "SERIES_LONGFORM",
+            "HYBRID"
+          ],
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "references/SCRIPT_AND_DIALOGUE_WRITING_ENGINE.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_ASSETS",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "ASSETS"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "phases/06_AI_PRODUCTION_FEASIBILITY.md",
+          "phases/07_ASSET_REQUIREMENT_MAP.md",
+          "phases/08_VISUAL_LAB_STYLE_BIBLE.md",
+          "phases/09_ASSET_FACTORY_REGISTRY_PREFLIGHT.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_STORYBOARD",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "STORYBOARD"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "phases/10_DIRECTOR_FINE_STORYBOARD.md",
+          "references/PROMPT_QUALITY_CORE.md",
+          "references/ALPHA7_CONTINUUM_CREATIVE_FIDELITY_ENGINE.md",
+          "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_PROMPT",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "PROMPT"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "references/ALPHA7_RUNTIME_INTEGRITY_CONTRACT.md",
+          "phases/11_PROVIDER_PROMPT_COMPILER.md",
+          "references/PROMPT_QUALITY_CORE.md",
+          "references/ALPHA7_CONTINUUM_CREATIVE_FIDELITY_ENGINE.md",
+          "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_EXECUTE",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "EXECUTE"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "references/ALPHA7_EXTERNAL_EXECUTION_CONTRACT.md",
+          "engines/10_EXECUTION_ORCHESTRATOR.md",
+          "phases/12_GENERATION_OBSERVATION_NCS_NRS.md",
+          "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_OBSERVE_REPAIR",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "OBSERVE_REPAIR"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "phases/12_GENERATION_OBSERVATION_NCS_NRS.md",
+          "phases/13_REPAIR_EDIT_COMMIT.md",
+          "engines/06_PRODUCTION_ALTERNATIVE_ENGINE.md",
+          "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_EDIT",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "EDIT"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "references/ALPHA7_RUNTIME_INTEGRITY_CONTRACT.md",
+          "references/ALPHA7_MEDIA_EXECUTION_AND_EDITING.md",
+          "references/AGE_SAFETY_PROVIDER_AND_COVERAGE_CONTRACT.md",
+          "phases/14_POST_PRODUCTION.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_TASK_FINAL_PREFLIGHT",
+        "priority": 40,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "FINAL_PREFLIGHT"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "references/ALPHA7_RUNTIME_INTEGRITY_CONTRACT.md",
+          "references/EVIDENCE_PROVIDER_RELEASE_LEARNING_CONTRACT.md",
+          "references/ALPHA7_MEDIA_EXECUTION_AND_EDITING.md",
+          "references/ALPHA7_CHINESE_COPY_AND_FOURFOLD_PREFLIGHT.md",
+          "phases/15_PACKAGING_COMPLIANCE_RELEASE.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_LONGFORM_STORY_DETAIL",
+        "priority": 50,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "STORY"
+          ],
+          "project_types": [
+            "SERIES_LONGFORM"
+          ],
+          "project_type_match": "ANY",
+          "flags_all": [],
+          "flags_none": []
+        },
+        "include": [
+          "phases/03_CHARACTER_SEASON_EPISODE_ARCHITECTURE.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_CURRENT_FACTS",
+        "priority": 60,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": "*",
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [
+            "current_facts"
+          ],
+          "flags_none": []
+        },
+        "include": [
+          "references/ON_DEMAND_RESEARCH_ROUTER.md",
+          "04_EVIDENCE_TREND_VIRAL_INTELLIGENCE.md"
+        ]
+      },
+      {
+        "rule_id": "ROUTE_MINORS",
+        "priority": 70,
+        "exclusive": false,
+        "when": {
+          "delivery_modes": [
+            "MEDIA_ENABLED"
+          ],
+          "tasks": [
+            "ASSETS",
+            "STORYBOARD",
+            "PROMPT",
+            "EXECUTE"
+          ],
+          "project_types": "*",
+          "project_type_match": "ANY",
+          "flags_all": [
+            "minors"
+          ],
+          "flags_none": []
+        },
+        "include": [
+          "references/AGE_SAFETY_PROVIDER_AND_COVERAGE_CONTRACT.md"
+        ]
+      }
+    ]
+  },
+  "catalogs": {
+    "tasks": [
+      "DISCOVER",
+      "GREENLIGHT",
+      "STORY",
+      "ASSETS",
+      "STORYBOARD",
+      "PROMPT",
+      "EXECUTE",
+      "OBSERVE_REPAIR",
+      "EDIT",
+      "FINAL_PREFLIGHT"
+    ],
+    "project_types": [
+      "NARRATIVE_SHORT",
+      "SERIES_LONGFORM",
+      "DOCUMENTARY_NONFICTION",
+      "CULTURE_HERITAGE",
+      "SCIENCE_RESEARCH_EXPLAINER",
+      "EDUCATION_PUBLIC_INTEREST",
+      "BRAND_PRODUCT",
+      "PORTFOLIO_DEMO",
+      "HYBRID"
+    ],
+    "triggers": [
+      "ALWAYS",
+      "TASK_SELECTED",
+      "ARCHITECTURE_AUDIT",
+      "STATE_MIGRATION",
+      "DECISION_CONFLICT",
+      "CURRENT_FACTS_REQUIRED",
+      "GATE_AUDIT",
+      "BLINDSPOT_REVIEW",
+      "INSIGHT_SYNTHESIS",
+      "CONTRADICTION_DETECTED",
+      "DECISION_AMBIGUITY",
+      "ARTIFACT_COMMIT",
+      "PROVIDER_UNKNOWN",
+      "PROVIDER_CHANGED",
+      "USER_OVERRIDE",
+      "PREMORTEM_REQUESTED",
+      "NEEDS_DIRECTOR_SOURCE",
+      "PERFORMANCE_LEARNING_REQUESTED",
+      "PRESENTATION_REVIEW",
+      "MINORS_PRESENT",
+      "CONTEXT_PRESSURE",
+      "NCS_NRS_SCORING",
+      "TEXT_ONLY_ECO_TEST",
+      "PROVIDER_REGISTRY_TOOL",
+      "AUDIT_REQUESTED"
+    ],
+    "conflicts": [
+      "ONEFILE_MODE",
+      "TEXT_ONLY_ECO_TEST",
+      "MEDIA_ENABLED",
+      "CREATIVE_RUNTIME_CONTEXT",
+      "UNVERIFIED_PROVIDER_ASSUMPTIONS",
+      "MODULAR_MULTI_MODULE_MODE"
+    ]
+  },
+  "entries": [
+    {
+      "path": "SKILL.md",
+      "classification": "BOOTSTRAP",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "ALWAYS"
+      ],
+      "dependencies": [],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 4344,
+      "authority_id": "AUTH_BOOTSTRAP_SKILL"
+    },
+    {
+      "path": "00_READ_ME_FIRST.md",
+      "classification": "BOOTSTRAP",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "ALWAYS"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 220,
+      "authority_id": "AUTH_BOOTSTRAP_READ_FIRST"
+    },
+    {
+      "path": "01_MASTER_ARCHITECTURE.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "ARCHITECTURE_AUDIT"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1511,
+      "authority_id": "AUTH_MASTER_ARCHITECTURE"
+    },
+    {
+      "path": "02_FIRST_CONTACT_ROUTER_AND_MODES.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "DISCOVER"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1457,
+      "authority_id": "AUTH_FIRST_CONTACT_ROUTER"
+    },
+    {
+      "path": "03_PROJECT_STATE_DECISIONS_AND_CONSTRAINTS.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "STATE_MIGRATION",
+        "DECISION_CONFLICT"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 4755,
+      "authority_id": "AUTH_PROJECT_STATE_DECISIONS"
+    },
+    {
+      "path": "04_EVIDENCE_TREND_VIRAL_INTELLIGENCE.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "CURRENT_FACTS_REQUIRED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 3387,
+      "authority_id": "AUTH_EVIDENCE_TREND_INTELLIGENCE"
+    },
+    {
+      "path": "05_STAGE_OUTPUT_AND_ARTIFACT_GATES.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "GATE_AUDIT"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 4183,
+      "authority_id": "AUTH_STAGE_OUTPUT_GATES"
+    },
+    {
+      "path": "engines/01_SILVER_BLINDSPOT.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "BLINDSPOT_REVIEW"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 777,
+      "authority_id": "AUTH_ENGINE_BLINDSPOT"
+    },
+    {
+      "path": "engines/02_SILVER_INSIGHT.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "INSIGHT_SYNTHESIS"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 426,
+      "authority_id": "AUTH_ENGINE_INSIGHT"
+    },
+    {
+      "path": "engines/03_GATE_CONTRADICTION_AND_COMPLEXITY.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "CONTRADICTION_DETECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1345,
+      "authority_id": "AUTH_ENGINE_CONTRADICTION_GATE"
+    },
+    {
+      "path": "engines/04_DECISION_BINDING_AND_AMBIGUITY.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "DECISION_AMBIGUITY"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 959,
+      "authority_id": "AUTH_ENGINE_DECISION_BINDING"
+    },
+    {
+      "path": "engines/05_ARTIFACT_SIMULATION_AND_COMMIT.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "ARTIFACT_COMMIT"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1863,
+      "authority_id": "AUTH_ENGINE_ARTIFACT_COMMIT"
+    },
+    {
+      "path": "engines/06_PRODUCTION_ALTERNATIVE_ENGINE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "OBSERVE_REPAIR"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1031,
+      "authority_id": "AUTH_ENGINE_PRODUCTION_ALTERNATIVE"
+    },
+    {
+      "path": "engines/07_DYNAMIC_PROVIDER_REGISTRY.md",
+      "classification": "TRIGGERED",
+      "tasks": [
+        "ASSETS",
+        "STORYBOARD",
+        "PROMPT",
+        "EXECUTE",
+        "EDIT",
+        "FINAL_PREFLIGHT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "PROVIDER_UNKNOWN",
+        "PROVIDER_CHANGED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/PROVIDER_REGISTRY_SEED_2026-08-14.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "UNVERIFIED_PROVIDER_ASSUMPTIONS"
+      ],
+      "model_readable": true,
+      "token_estimate": 2487,
+      "authority_id": "AUTH_ENGINE_DYNAMIC_PROVIDER_REGISTRY"
+    },
+    {
+      "path": "engines/08_USER_PRIORITY_OVERRIDE.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "USER_OVERRIDE"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 569,
+      "authority_id": "AUTH_ENGINE_USER_PRIORITY_OVERRIDE"
+    },
+    {
+      "path": "engines/09_STRUCTURAL_PREMORTEM.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "PREMORTEM_REQUESTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 484,
+      "authority_id": "AUTH_ENGINE_STRUCTURAL_PREMORTEM"
+    },
+    {
+      "path": "engines/10_EXECUTION_ORCHESTRATOR.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "EXECUTE"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/ALPHA7_EXTERNAL_EXECUTION_CONTRACT.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "model_readable": true,
+      "token_estimate": 1356,
+      "authority_id": "AUTH_ENGINE_EXECUTION_ORCHESTRATOR"
+    },
+    {
+      "path": "phases/00_DISCOVER_PROJECT_BRIEF.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "DISCOVER"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "02_FIRST_CONTACT_ROUTER_AND_MODES.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 897,
+      "authority_id": "AUTH_PHASE_DISCOVER_PROJECT_BRIEF"
+    },
+    {
+      "path": "phases/01_GREENLIGHT_MARKET_CREATIVE_DIRECTION.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "GREENLIGHT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 763,
+      "authority_id": "AUTH_PHASE_GREENLIGHT"
+    },
+    {
+      "path": "phases/02_STORY_ENGINE_SERIES_BIBLE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORY"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 542,
+      "authority_id": "AUTH_PHASE_STORY_ENGINE"
+    },
+    {
+      "path": "phases/03_CHARACTER_SEASON_EPISODE_ARCHITECTURE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORY"
+      ],
+      "project_types": [
+        "SERIES_LONGFORM"
+      ],
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/ALPHA7_LONGFORM_CONTINUITY_ENGINE.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 450,
+      "authority_id": "AUTH_PHASE_CHARACTER_SEASON_EPISODE"
+    },
+    {
+      "path": "phases/04_SCRIPT_ROOM_ATTENTION_ARCHITECTURE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORY"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/ALPHA7_CONTINUUM_CREATIVE_FIDELITY_ENGINE.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1058,
+      "authority_id": "AUTH_PHASE_SCRIPT_ROOM"
+    },
+    {
+      "path": "phases/05_DEVILS_REVIEW_SCRIPT_GATE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORY"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 922,
+      "authority_id": "AUTH_PHASE_SCRIPT_GATE"
+    },
+    {
+      "path": "references/SCRIPT_AND_DIALOGUE_WRITING_ENGINE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORY"
+      ],
+      "project_types": [
+        "NARRATIVE_SHORT",
+        "SERIES_LONGFORM",
+        "HYBRID"
+      ],
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "phases/04_SCRIPT_ROOM_ATTENTION_ARCHITECTURE.md",
+        "references/ALPHA7_CONTINUUM_CREATIVE_FIDELITY_ENGINE.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "model_readable": true,
+      "token_estimate": 2750,
+      "authority_id": "AUTH_REF_RICH_COPYWRITING"
+    },
+    {
+      "path": "references/ALPHA7_CONTINUUM_CREATIVE_FIDELITY_ENGINE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORY",
+        "STORYBOARD",
+        "PROMPT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "model_readable": true,
+      "token_estimate": 3485,
+      "authority_id": "AUTH_REF_CONTINUUM_CREATIVE_FIDELITY"
+    },
+    {
+      "path": "phases/06_AI_PRODUCTION_FEASIBILITY.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "ASSETS"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1614,
+      "authority_id": "AUTH_PHASE_PRODUCTION_FEASIBILITY"
+    },
+    {
+      "path": "phases/07_ASSET_REQUIREMENT_MAP.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "ASSETS"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 781,
+      "authority_id": "AUTH_PHASE_ASSET_REQUIREMENT_MAP"
+    },
+    {
+      "path": "phases/08_VISUAL_LAB_STYLE_BIBLE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "ASSETS"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 550,
+      "authority_id": "AUTH_PHASE_VISUAL_STYLE"
+    },
+    {
+      "path": "phases/09_ASSET_FACTORY_REGISTRY_PREFLIGHT.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "ASSETS"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1509,
+      "authority_id": "AUTH_PHASE_ASSET_FACTORY_PREFLIGHT"
+    },
+    {
+      "path": "phases/10_DIRECTOR_FINE_STORYBOARD.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORYBOARD",
+        "PROMPT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED",
+        "NEEDS_DIRECTOR_SOURCE"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/PROMPT_QUALITY_CORE.md",
+        "references/ALPHA7_CONTINUUM_CREATIVE_FIDELITY_ENGINE.md",
+        "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 2747,
+      "authority_id": "AUTH_PHASE_DIRECTOR_STORYBOARD"
+    },
+    {
+      "path": "phases/11_PROVIDER_PROMPT_COMPILER.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "PROMPT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/ALPHA7_RUNTIME_INTEGRITY_CONTRACT.md",
+        "references/PROMPT_QUALITY_CORE.md",
+        "references/ALPHA7_CONTINUUM_CREATIVE_FIDELITY_ENGINE.md",
+        "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 4084,
+      "authority_id": "AUTH_PHASE_PROVIDER_PROMPT_COMPILER"
+    },
+    {
+      "path": "phases/12_GENERATION_OBSERVATION_NCS_NRS.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "EXECUTE",
+        "OBSERVE_REPAIR"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/NCS_NRS_BASELINE.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "model_readable": true,
+      "token_estimate": 1780,
+      "authority_id": "AUTH_PHASE_GENERATION_OBSERVATION"
+    },
+    {
+      "path": "phases/13_REPAIR_EDIT_COMMIT.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "OBSERVE_REPAIR"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "engines/06_PRODUCTION_ALTERNATIVE_ENGINE.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1325,
+      "authority_id": "AUTH_PHASE_REPAIR_EDIT_COMMIT"
+    },
+    {
+      "path": "phases/14_POST_PRODUCTION.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "EDIT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/ALPHA7_RUNTIME_INTEGRITY_CONTRACT.md",
+        "references/ALPHA7_MEDIA_EXECUTION_AND_EDITING.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "model_readable": true,
+      "token_estimate": 2500,
+      "authority_id": "AUTH_PHASE_POST_PRODUCTION"
+    },
+    {
+      "path": "phases/15_PACKAGING_COMPLIANCE_RELEASE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "FINAL_PREFLIGHT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/EVIDENCE_PROVIDER_RELEASE_LEARNING_CONTRACT.md",
+        "references/ALPHA7_CHINESE_COPY_AND_FOURFOLD_PREFLIGHT.md",
+        "references/ALPHA7_MEDIA_EXECUTION_AND_EDITING.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1908,
+      "authority_id": "AUTH_PHASE_PACKAGING_RELEASE"
+    },
+    {
+      "path": "phases/16_PERFORMANCE_LEARNING.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "PERFORMANCE_LEARNING_REQUESTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1426,
+      "authority_id": "AUTH_PHASE_PERFORMANCE_LEARNING"
+    },
+    {
+      "path": "references/LANGUAGE_AND_PRESENTATION_CONTRACT.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "PRESENTATION_REVIEW"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 2104,
+      "authority_id": "AUTH_REF_LANGUAGE_PRESENTATION"
+    },
+    {
+      "path": "references/EVIDENCE_PROVIDER_RELEASE_LEARNING_CONTRACT.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "FINAL_PREFLIGHT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 2891,
+      "authority_id": "AUTH_REF_EVIDENCE_PROVIDER_RELEASE"
+    },
+    {
+      "path": "references/ALPHA7_CHINESE_COPY_AND_FOURFOLD_PREFLIGHT.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "FINAL_PREFLIGHT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 3625,
+      "authority_id": "AUTH_REF_CHINESE_COPY_PREFLIGHT"
+    },
+    {
+      "path": "references/ALPHA7_EXTERNAL_EXECUTION_CONTRACT.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "EXECUTE"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "model_readable": true,
+      "token_estimate": 1577,
+      "authority_id": "AUTH_REF_EXTERNAL_EXECUTION"
+    },
+    {
+      "path": "references/ALPHA7_LONGFORM_CONTINUITY_ENGINE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": "*",
+      "project_types": [
+        "SERIES_LONGFORM"
+      ],
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 9588,
+      "authority_id": "AUTH_REF_LONGFORM_CONTINUITY"
+    },
+    {
+      "path": "references/ALPHA7_MEDIA_EXECUTION_AND_EDITING.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "EDIT",
+        "FINAL_PREFLIGHT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "model_readable": true,
+      "token_estimate": 6976,
+      "authority_id": "AUTH_REF_MEDIA_EXECUTION_EDITING"
+    },
+    {
+      "path": "references/ALPHA7_PROJECT_TYPE_AND_ORCHESTRATION.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": "*",
+      "project_types": [
+        "DOCUMENTARY_NONFICTION",
+        "CULTURE_HERITAGE",
+        "SCIENCE_RESEARCH_EXPLAINER",
+        "EDUCATION_PUBLIC_INTEREST"
+      ],
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 2044,
+      "authority_id": "AUTH_REF_PROJECT_TYPE_ORCHESTRATION"
+    },
+    {
+      "path": "references/ALPHA7_RUNTIME_INTEGRITY_CONTRACT.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "PROMPT",
+        "EDIT",
+        "FINAL_PREFLIGHT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 5022,
+      "authority_id": "AUTH_REF_RUNTIME_INTEGRITY"
+    },
+    {
+      "path": "references/AGE_SAFETY_PROVIDER_AND_COVERAGE_CONTRACT.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "ASSETS",
+        "STORYBOARD",
+        "PROMPT",
+        "EXECUTE",
+        "EDIT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED",
+        "MINORS_PRESENT"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 4633,
+      "authority_id": "AUTH_REF_MINOR_PROVIDER_COVERAGE"
+    },
+    {
+      "path": "references/CONTEXT_AND_BATCH_BUDGET.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "CONTEXT_PRESSURE"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 3164,
+      "authority_id": "AUTH_REF_CONTEXT_BATCH_BUDGET"
+    },
+    {
+      "path": "references/ON_DEMAND_RESEARCH_ROUTER.md",
+      "classification": "TRIGGERED",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "CURRENT_FACTS_REQUIRED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "04_EVIDENCE_TREND_VIRAL_INTELLIGENCE.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 1572,
+      "authority_id": "AUTH_REF_ON_DEMAND_RESEARCH"
+    },
+    {
+      "path": "references/PROMPT_QUALITY_CORE.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORYBOARD",
+        "PROMPT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md",
+        "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 11701,
+      "authority_id": "AUTH_REF_PROMPT_QUALITY_CORE"
+    },
+    {
+      "path": "references/ALPHA7_MASTER_PRODUCTION_CONTROL.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "STORYBOARD",
+        "PROMPT",
+        "EXECUTE",
+        "OBSERVE_REPAIR"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "TASK_SELECTED"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "model_readable": true,
+      "token_estimate": 2726,
+      "authority_id": "AUTH_REF_MASTER_PRODUCTION_CONTROL"
+    },
+    {
+      "path": "references/TEXT_ONLY_ECO_WORKFLOW.md",
+      "classification": "TASK_REQUIRED",
+      "tasks": [
+        "PROMPT"
+      ],
+      "project_types": [
+        "SERIES_LONGFORM"
+      ],
+      "triggers": [
+        "TASK_SELECTED",
+        "TEXT_ONLY_ECO_TEST"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "MEDIA_ENABLED",
+        "MODULAR_MULTI_MODULE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 2489,
+      "authority_id": "AUTH_REF_TEXT_ONLY_ECO_TEST"
+    },
+    {
+      "path": "references/NCS_NRS_BASELINE.md",
+      "classification": "TRIGGERED",
+      "tasks": [
+        "OBSERVE_REPAIR"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "NCS_NRS_SCORING"
+      ],
+      "dependencies": [
+        "SKILL.md"
+      ],
+      "conflicts": [
+        "ONEFILE_MODE"
+      ],
+      "model_readable": true,
+      "token_estimate": 923,
+      "authority_id": "AUTH_REF_NCS_NRS_BASELINE"
+    },
+    {
+      "path": "references/PROVIDER_REGISTRY_SEED_2026-08-14.md",
+      "classification": "TOOL_ONLY",
+      "tasks": [
+        "ASSETS",
+        "STORYBOARD",
+        "PROMPT",
+        "EXECUTE",
+        "EDIT",
+        "FINAL_PREFLIGHT"
+      ],
+      "project_types": "*",
+      "triggers": [
+        "PROVIDER_REGISTRY_TOOL"
+      ],
+      "dependencies": [],
+      "conflicts": [
+        "UNVERIFIED_PROVIDER_ASSUMPTIONS"
+      ],
+      "model_readable": false,
+      "token_estimate": 602,
+      "authority_id": "AUTH_TOOL_PROVIDER_REGISTRY_SEED"
+    },
+    {
+      "path": "references/THIRD_PARTY_ATTRIBUTIONS.md",
+      "classification": "AUDIT_ONLY",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "AUDIT_REQUESTED"
+      ],
+      "dependencies": [],
+      "conflicts": [
+        "CREATIVE_RUNTIME_CONTEXT"
+      ],
+      "model_readable": false,
+      "token_estimate": 3126,
+      "authority_id": "AUTH_AUDIT_THIRD_PARTY_ATTRIBUTIONS"
+    },
+    {
+      "path": "VERSION_NOTES.md",
+      "classification": "AUDIT_ONLY",
+      "tasks": "*",
+      "project_types": "*",
+      "triggers": [
+        "AUDIT_REQUESTED"
+      ],
+      "dependencies": [],
+      "conflicts": [
+        "CREATIVE_RUNTIME_CONTEXT"
+      ],
+      "model_readable": false,
+      "token_estimate": 582,
+      "authority_id": "AUTH_AUDIT_VERSION_NOTES"
+    }
+  ]
+}

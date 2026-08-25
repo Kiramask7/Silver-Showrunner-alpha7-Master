@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MinorSafetyProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": { "type": "string", "pattern": "^MIN-" },
+    "asset_id": { "type": "string", "minLength": 1 },
+    "source_spec_version": { "type": "string", "minLength": 1 },
+    "is_minor": { "const": true },
+    "age_years": { "type": ["integer", "null"], "minimum": 0 },
+    "source_life_stage": {
+      "enum": ["INFANT", "CHILD", "EARLY_ADOLESCENT", "LATE_ADOLESCENT", "UNKNOWN"]
+    },
+    "age_source_ids": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "majority_age_years": { "type": "integer", "minimum": 1 },
+    "age_rule_basis": { "enum": ["APPLICABLE_RULE", "PROJECT_CANON", "UNKNOWN"] },
+    "age_rule_source_or_evidence_ids": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "minor_compilation_mode": { "enum": ["EXACT", "LIFE_STAGE", "REFERENCE_BOUND"] },
+    "compiled_age_years": { "type": ["integer", "null"], "minimum": 0 },
+    "compiled_life_stage": {
+      "type": ["string", "null"],
+      "enum": ["INFANT", "CHILD", "EARLY_ADOLESCENT", "LATE_ADOLESCENT", "UNKNOWN", null]
+    },
+    "reference_asset_ids": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "compatibility_alternative": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "preserves_source_age_fact": { "const": true },
+        "review_bypass_forbidden": { "const": true },
+        "review_status": { "enum": ["REQUIRED", "PASSED"] },
+        "used_in_compilation": { "type": "boolean" }
+      },
+      "required": [
+        "description", "preserves_source_age_fact", "review_bypass_forbidden", "review_status",
+        "used_in_compilation"
+      ]
+    },
+    "safety_review_status": { "enum": ["REQUIRED", "PASSED"] }
+  },
+  "required": [
+    "profile_id", "asset_id", "source_spec_version", "is_minor", "age_years",
+    "source_life_stage", "age_source_ids", "majority_age_years", "age_rule_basis",
+    "age_rule_source_or_evidence_ids", "minor_compilation_mode",
+    "compiled_age_years", "compiled_life_stage", "reference_asset_ids",
+    "compatibility_alternative", "safety_review_status"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "minor_compilation_mode": { "const": "EXACT" } }, "required": ["minor_compilation_mode"] },
+      "then": {
+        "properties": {
+          "age_years": { "type": "integer", "minimum": 0 },
+          "compiled_age_years": { "type": "integer", "minimum": 0 },
+          "compiled_life_stage": { "type": "null" },
+          "reference_asset_ids": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "minor_compilation_mode": { "const": "LIFE_STAGE" } }, "required": ["minor_compilation_mode"] },
+      "then": {
+        "properties": {
+          "source_life_stage": {
+            "enum": ["INFANT", "CHILD", "EARLY_ADOLESCENT", "LATE_ADOLESCENT"]
+          },
+          "compiled_age_years": { "type": "null" },
+          "compiled_life_stage": {
+            "enum": ["INFANT", "CHILD", "EARLY_ADOLESCENT", "LATE_ADOLESCENT"]
+          },
+          "reference_asset_ids": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "minor_compilation_mode": { "const": "REFERENCE_BOUND" } }, "required": ["minor_compilation_mode"] },
+      "then": {
+        "properties": {
+          "compiled_age_years": { "type": "null" },
+          "compiled_life_stage": { "type": "null" },
+          "reference_asset_ids": { "minItems": 1 }
+        }
+      }
+    }
+  ]
+}

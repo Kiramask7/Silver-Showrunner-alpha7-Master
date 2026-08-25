@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StageResult",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "workflow_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "spec_status": { "enum": ["SPEC_DRAFT", "SPEC_READY"] },
+        "execution_status": { "enum": ["NOT_EXECUTED", "EXECUTION_PENDING", "EXECUTING", "EXECUTED_FAILED", "EXECUTED_SUCCEEDED", "SIMULATED_ONLY"] },
+        "observation_status": { "enum": ["NOT_APPLICABLE", "OBSERVATION_PENDING", "OBSERVED"] },
+        "qa_status": { "enum": ["NOT_APPLICABLE", "QA_NOT_EXECUTED", "QA_FAILED", "QA_PASSED", "QA_ACCEPTED_WITH_DEBT"] },
+        "publication_status": { "enum": ["NOT_PLANNED", "RELEASE_NOT_READY", "RELEASE_READY", "PUBLISH_PENDING", "PUBLISHED", "PUBLICATION_FAILED"] },
+        "learning_status": { "enum": ["NO_REAL_DATA", "DATA_COLLECTION_PENDING", "DATA_AVAILABLE", "LEARNING_DRAFT", "LEARNING_VALIDATED"] },
+        "status_basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "execution_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+            "observation_ids": { "type": "array", "items": { "type": "string", "pattern": "^OBS-" }, "uniqueItems": true },
+            "qa_gate_ids": { "type": "array", "items": { "type": "string", "pattern": "^G-" }, "uniqueItems": true },
+            "release_gate_ids": { "type": "array", "items": { "type": "string", "pattern": "^G-" }, "uniqueItems": true },
+            "publication_ids": { "type": "array", "items": { "type": "string", "pattern": "^PUB-" }, "uniqueItems": true },
+            "learning_ids": { "type": "array", "items": { "type": "string", "pattern": "^L-" }, "uniqueItems": true }
+          },
+          "required": ["execution_artifact_ids", "observation_ids", "qa_gate_ids", "release_gate_ids", "publication_ids", "learning_ids"]
+        }
+      },
+      "required": ["spec_status", "execution_status", "observation_status", "qa_status", "publication_status", "learning_status", "status_basis"]
+    }
+  },
+  "properties": {
+    "snapshot_kind": { "const": "PROJECT_STATE_SNAPSHOT" },
+    "stage": { "type": "string" },
+    "result": { "type": "string" },
+    "output_locale": { "type": "string", "default": "zh-CN" },
+    "execution_mode": { "enum": ["REAL", "SIMULATION"] },
+    "workflow_status": { "$ref": "#/$defs/workflow_status" },
+    "terminal_markers": {
+      "type": "array",
+      "items": { "const": "REAL_PRODUCTION_COMPLETE" },
+      "uniqueItems": true,
+      "maxItems": 1
+    },
+    "evidence_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "real_artifact_count": { "type": "integer", "minimum": 0 },
+    "confidence": { "type": "string" },
+    "unknowns": { "type": "array" },
+    "recommendation": { "type": "string" },
+    "gate_ids": { "type": "array", "items": { "type": "string", "pattern": "^G-" }, "uniqueItems": true },
+    "decisions": { "type": "array" },
+    "locked_decision_ids": { "type": "array", "items": { "type": "string", "pattern": "^D-" }, "uniqueItems": true },
+    "decision_scope_diff": { "type": "object" },
+    "artifacts": { "type": "array" },
+    "open_blocking_issue_ids": { "type": "array", "items": { "type": "string" } },
+    "blindspots": { "type": "array", "maxItems": 3 },
+    "insight": { "type": ["string", "null"] },
+    "next_action": { "type": "string" }
+  },
+  "required": [
+    "snapshot_kind", "stage", "result", "output_locale", "execution_mode", "workflow_status", "terminal_markers",
+    "evidence_ids", "real_artifact_count", "gate_ids", "locked_decision_ids", "open_blocking_issue_ids", "next_action"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "workflow_status": { "properties": { "execution_status": { "const": "SIMULATED_ONLY" } }, "required": ["execution_status"] } },
+        "required": ["workflow_status"]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": { "const": "SIMULATION" },
+          "workflow_status": {
+            "properties": {
+              "observation_status": { "enum": ["NOT_APPLICABLE", "OBSERVATION_PENDING"] },
+              "qa_status": { "enum": ["NOT_APPLICABLE", "QA_NOT_EXECUTED"] },
+              "publication_status": { "enum": ["NOT_PLANNED", "RELEASE_NOT_READY"] },
+              "learning_status": { "enum": ["NO_REAL_DATA", "DATA_COLLECTION_PENDING"] }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

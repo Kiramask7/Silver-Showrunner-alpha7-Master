@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProviderCompiledPrompt",
+  "$defs": {
+    "prompt_section": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "section_id": { "type": "string", "pattern": "^SEC-" },
+        "kind": {
+          "enum": [
+            "TASK", "REFERENCE_ASSET", "SCENE_STYLE_CONTINUITY",
+            "DIRECTOR_TIMELINE", "STATIC_FRAME", "SOUND", "NEGATIVE", "TRANSFORM_PLAN"
+          ]
+        },
+        "order": { "type": "integer", "minimum": 1 },
+        "start_char": { "type": "integer", "minimum": 0 },
+        "end_char": { "type": "integer", "minimum": 1 },
+        "atom_ids": {
+          "type": "array", "items": { "type": "string", "pattern": "^PSA-" }, "uniqueItems": true
+        },
+        "beat_ids": {
+          "type": "array", "items": { "type": "string", "pattern": "^BT-" }, "uniqueItems": true
+        }
+      },
+      "required": ["section_id", "kind", "order", "start_char", "end_char", "atom_ids", "beat_ids"]
+    },
+    "master_prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^MP-" },
+        "prompt_layer": { "const": "PROVIDER_NEUTRAL_MASTER" },
+        "target_type": { "enum": ["ASSET", "SHOT"] },
+        "target_id": { "type": "string", "minLength": 1 },
+        "generation_role": { "enum": ["ASSET_REFERENCE", "ASSET_MOTION_REFERENCE", "SHOT_KEYFRAME", "SHOT_START_FRAME", "SHOT_END_FRAME", "SHOT_MOTION", "SHOT_COMPOSITE_LAYER", "CUSTOM"] },
+        "generation_medium": { "enum": ["IMAGE", "VIDEO"] },
+        "shot_id": { "type": ["string", "null"], "minLength": 1 },
+        "asset_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "reference_ids": { "type": "array", "items": { "type": "string", "pattern": "^REF-" }, "uniqueItems": true },
+        "minor_safety_profile_ids": { "type": "array", "items": { "type": "string", "pattern": "^MIN-" }, "uniqueItems": true },
+        "source_spec_version": { "type": "string", "minLength": 1 },
+        "master_prompt_text": { "type": "string", "minLength": 1 },
+        "prompt_sections": { "type": "array", "items": { "$ref": "#/$defs/prompt_section" }, "minItems": 1 },
+        "intent_summary_zh": { "type": "string", "minLength": 1, "pattern": "[\\u3400-\\u4DBF\\u4E00-\\u9FFF]" },
+        "protected_unknown_ids": { "type": "array", "items": { "type": "string", "pattern": "^U-" }, "uniqueItems": true },
+        "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+        "causal_boundary_ids": { "type": "array", "items": { "type": "string", "pattern": "^CB-" }, "uniqueItems": true }
+      },
+      "required": [
+        "id", "prompt_layer", "target_type", "target_id", "generation_role", "generation_medium",
+        "shot_id", "asset_ids", "reference_ids", "minor_safety_profile_ids", "source_spec_version",
+        "master_prompt_text", "prompt_sections", "intent_summary_zh", "protected_unknown_ids", "quantity_ids",
+        "causal_boundary_ids"
+      ]
+    },
+    "provider_neutral_draft": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^PD-" },
+        "prompt_layer": { "const": "PROVIDER_NEUTRAL_DRAFT" },
+        "master_prompt_id": { "type": "string", "pattern": "^MP-" },
+        "target_type": { "enum": ["ASSET", "SHOT"] },
+        "target_id": { "type": "string", "minLength": 1 },
+        "generation_role": { "enum": ["ASSET_REFERENCE", "ASSET_MOTION_REFERENCE", "SHOT_KEYFRAME", "SHOT_START_FRAME", "SHOT_END_FRAME", "SHOT_MOTION", "SHOT_COMPOSITE_LAYER", "CUSTOM"] },
+        "generation_medium": { "enum": ["IMAGE", "VIDEO"] },
+        "shot_id": { "type": ["string", "null"], "minLength": 1 },
+        "asset_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "reference_ids": { "type": "array", "items": { "type": "string", "pattern": "^REF-" }, "uniqueItems": true },
+        "minor_safety_profile_ids": { "type": "array", "items": { "type": "string", "pattern": "^MIN-" }, "uniqueItems": true },
+        "source_spec_version": { "type": "string", "minLength": 1 },
+        "draft_prompt_text": { "type": "string", "minLength": 1 },
+        "prompt_sections": { "type": "array", "items": { "$ref": "#/$defs/prompt_section" }, "minItems": 1 },
+        "intent_summary_zh": { "type": "string", "minLength": 1, "pattern": "[\\u3400-\\u4DBF\\u4E00-\\u9FFF]" },
+        "protected_unknown_ids": { "type": "array", "items": { "type": "string", "pattern": "^U-" }, "uniqueItems": true },
+        "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+        "causal_boundary_ids": { "type": "array", "items": { "type": "string", "pattern": "^CB-" }, "uniqueItems": true }
+      },
+      "required": [
+        "id", "prompt_layer", "master_prompt_id", "target_type", "target_id", "generation_role",
+        "generation_medium", "shot_id", "asset_ids", "reference_ids", "minor_safety_profile_ids",
+        "source_spec_version", "draft_prompt_text", "prompt_sections", "intent_summary_zh", "protected_unknown_ids",
+        "quantity_ids", "causal_boundary_ids"
+      ]
+    },
+    "transform_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^TP-" },
+        "prompt_layer": { "const": "TRANSFORM_PLAN" },
+        "master_prompt_id": { "type": "string", "pattern": "^MP-" },
+        "target_type": { "enum": ["ASSET", "SHOT"] },
+        "target_id": { "type": "string", "minLength": 1 },
+        "generation_role": { "enum": ["ASSET_REFERENCE", "ASSET_MOTION_REFERENCE", "SHOT_KEYFRAME", "SHOT_START_FRAME", "SHOT_END_FRAME", "SHOT_MOTION", "SHOT_COMPOSITE_LAYER", "CUSTOM"] },
+        "generation_medium": { "enum": ["IMAGE", "VIDEO"] },
+        "shot_id": { "type": ["string", "null"], "minLength": 1 },
+        "asset_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "reference_ids": { "type": "array", "items": { "type": "string", "pattern": "^REF-" }, "uniqueItems": true },
+        "minor_safety_profile_ids": { "type": "array", "items": { "type": "string", "pattern": "^MIN-" }, "uniqueItems": true },
+        "source_spec_version": { "type": "string", "minLength": 1 },
+        "transform_plan_text": { "type": "string", "minLength": 1 },
+        "prompt_sections": { "type": "array", "items": { "$ref": "#/$defs/prompt_section" }, "minItems": 1 },
+        "intent_summary_zh": { "type": "string", "minLength": 1, "pattern": "[\\u3400-\\u4DBF\\u4E00-\\u9FFF]" },
+        "protected_unknown_ids": { "type": "array", "items": { "type": "string", "pattern": "^U-" }, "uniqueItems": true },
+        "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+        "causal_boundary_ids": { "type": "array", "items": { "type": "string", "pattern": "^CB-" }, "uniqueItems": true }
+      },
+      "required": [
+        "id", "prompt_layer", "master_prompt_id", "target_type", "target_id", "generation_role",
+        "generation_medium", "shot_id", "asset_ids", "reference_ids", "minor_safety_profile_ids",
+        "source_spec_version", "transform_plan_text", "prompt_sections", "intent_summary_zh", "protected_unknown_ids",
+        "quantity_ids", "causal_boundary_ids"
+      ]
+    },
+    "neutral_execution_prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^NEP-" },
+        "prompt_layer": { "const": "NEUTRAL_EXECUTION_PROMPT" },
+        "master_prompt_id": { "type": "string", "pattern": "^MP-" },
+        "transform_plan_id": { "type": "string", "pattern": "^TP-" },
+        "target_type": { "enum": ["ASSET", "SHOT"] },
+        "target_id": { "type": "string", "minLength": 1 },
+        "generation_role": { "enum": ["ASSET_REFERENCE", "ASSET_MOTION_REFERENCE", "SHOT_KEYFRAME", "SHOT_START_FRAME", "SHOT_END_FRAME", "SHOT_MOTION", "SHOT_COMPOSITE_LAYER", "CUSTOM"] },
+        "generation_medium": { "enum": ["IMAGE", "VIDEO"] },
+        "shot_id": { "type": ["string", "null"], "minLength": 1 },
+        "asset_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "reference_ids": { "type": "array", "items": { "type": "string", "pattern": "^REF-" }, "uniqueItems": true },
+        "minor_safety_profile_ids": { "type": "array", "items": { "type": "string", "pattern": "^MIN-" }, "uniqueItems": true },
+        "source_spec_version": { "type": "string", "minLength": 1 },
+        "neutral_execution_prompt_text": { "type": "string", "minLength": 1 },
+        "prompt_sections": { "type": "array", "items": { "$ref": "#/$defs/prompt_section" }, "minItems": 1 },
+        "intent_summary_zh": { "type": "string", "minLength": 1, "pattern": "[\\u3400-\\u4DBF\\u4E00-\\u9FFF]" },
+        "protected_unknown_ids": { "type": "array", "items": { "type": "string", "pattern": "^U-" }, "uniqueItems": true },
+        "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+        "causal_boundary_ids": { "type": "array", "items": { "type": "string", "pattern": "^CB-" }, "uniqueItems": true }
+      },
+      "required": [
+        "id", "prompt_layer", "master_prompt_id", "transform_plan_id", "target_type", "target_id",
+        "generation_role", "generation_medium", "shot_id", "asset_ids", "reference_ids",
+        "minor_safety_profile_ids", "source_spec_version", "neutral_execution_prompt_text", "prompt_sections",
+        "intent_summary_zh", "protected_unknown_ids", "quantity_ids", "causal_boundary_ids"
+      ]
+    },
+    "reference_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reference_id": { "type": "string", "pattern": "^REF-" },
+        "asset_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "role": { "enum": ["IDENTITY", "COSTUME", "SCENE", "COMPOSITION", "STYLE", "MOTION", "PROP_OWNERSHIP", "STATE", "FORMAT"] },
+        "controls": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "must_not_control": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      },
+      "required": ["reference_id", "asset_id", "version", "role", "controls", "must_not_control"]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^PP-" },
+    "prompt_layer": { "const": "PROVIDER_COMPILED" },
+    "master_prompt_id": { "type": "string", "pattern": "^MP-" },
+    "provider_neutral_draft_id": { "type": "string", "pattern": "^PD-" },
+    "transform_plan_id": { "type": "string", "pattern": "^TP-" },
+    "neutral_execution_prompt_id": { "type": "string", "pattern": "^NEP-" },
+    "provider": { "type": "string", "minLength": 1 },
+    "provider_registry_id": { "type": "string", "pattern": "^PRV-" },
+    "provider_snapshot_id": { "type": "string", "minLength": 1 },
+    "execution_contract": {
+      "enum": ["MANUAL_COPY_TEXT_SPEC_ONLY", "GENERATION_EXECUTABLE"]
+    },
+    "capability_evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "target_type": { "enum": ["ASSET", "SHOT"] },
+    "target_id": { "type": "string", "minLength": 1 },
+    "generation_role": { "enum": ["ASSET_REFERENCE", "ASSET_MOTION_REFERENCE", "SHOT_KEYFRAME", "SHOT_START_FRAME", "SHOT_END_FRAME", "SHOT_MOTION", "SHOT_COMPOSITE_LAYER", "CUSTOM"] },
+    "generation_medium": { "enum": ["IMAGE", "VIDEO"] },
+    "shot_id": { "type": ["string", "null"], "minLength": 1 },
+    "asset_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "reference_ids": { "type": "array", "items": { "type": "string", "pattern": "^REF-" }, "uniqueItems": true },
+    "minor_safety_profile_ids": { "type": "array", "items": { "type": "string", "pattern": "^MIN-" }, "uniqueItems": true },
+    "source_spec_version": { "type": "string", "minLength": 1 },
+    "prompt_locale": { "type": "string", "minLength": 2 },
+    "prompt_text": { "type": "string", "minLength": 1 },
+    "prompt_sections": { "type": "array", "items": { "$ref": "#/$defs/prompt_section" }, "minItems": 1 },
+    "intent_summary_zh": { "type": "string", "minLength": 1, "pattern": "[\\u3400-\\u4DBF\\u4E00-\\u9FFF]" },
+    "requested_output_duration_seconds": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+    "editorial_target_duration_seconds": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+    "trim_to_editorial": { "type": "boolean" },
+    "protected_unknown_ids": { "type": "array", "items": { "type": "string", "pattern": "^U-" }, "uniqueItems": true },
+    "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+    "causal_boundary_ids": { "type": "array", "items": { "type": "string", "pattern": "^CB-" }, "uniqueItems": true }
+  },
+  "required": [
+    "id", "prompt_layer", "master_prompt_id", "provider",
+    "provider_registry_id", "provider_snapshot_id", "execution_contract", "capability_evidence_ids", "target_type", "target_id",
+    "generation_role", "generation_medium", "shot_id", "asset_ids", "reference_ids", "minor_safety_profile_ids",
+    "source_spec_version", "prompt_locale", "prompt_text", "prompt_sections", "intent_summary_zh",
+    "requested_output_duration_seconds", "editorial_target_duration_seconds", "trim_to_editorial",
+    "protected_unknown_ids", "quantity_ids", "causal_boundary_ids"
+  ],
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "required": ["provider_neutral_draft_id"],
+          "allOf": [
+            { "not": { "required": ["transform_plan_id"] } },
+            { "not": { "required": ["neutral_execution_prompt_id"] } }
+          ]
+        },
+        {
+          "required": ["transform_plan_id", "neutral_execution_prompt_id"],
+          "not": { "required": ["provider_neutral_draft_id"] }
+        }
+      ]
+    },
+    {
+      "if": {
+        "properties": { "prompt_locale": { "not": { "pattern": "^[zZ][hH](-|$)" } } },
+        "required": ["prompt_locale"]
+      },
+      "then": {
+        "properties": {
+          "intent_summary_zh": { "type": "string", "minLength": 1, "pattern": "[\\u3400-\\u4DBF\\u4E00-\\u9FFF]" }
+        }
+      }
+    }
+  ]
+}

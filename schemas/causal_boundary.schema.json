@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CausalBoundary",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "boundary_id": { "type": "string", "pattern": "^CB-" },
+    "subject": { "type": "string", "minLength": 1 },
+    "object": { "type": "string", "minLength": 1 },
+    "allowed_claim_level": { "enum": ["UNKNOWN", "CORRELATION_ONLY", "CAUSAL"] },
+    "source_decision_ids": { "type": "array", "items": { "type": "string", "pattern": "^D-" }, "uniqueItems": true },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "affected_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "affected_shot_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "affected_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^(MP|PD|PP)-" }, "uniqueItems": true },
+    "audited_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "audited_shot_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "audited_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^(MP|PD|PP)-" }, "uniqueItems": true },
+    "implication_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "temporal_adjacency": { "enum": ["CLEAR", "RISK", "VIOLATION"] },
+        "sound_coupling": { "enum": ["CLEAR", "RISK", "VIOLATION"] },
+        "spatial_direction": { "enum": ["CLEAR", "RISK", "VIOLATION"] },
+        "visual_similarity": { "enum": ["CLEAR", "RISK", "VIOLATION"] },
+        "dialogue_or_caption": { "enum": ["CLEAR", "RISK", "VIOLATION"] }
+      },
+      "required": ["temporal_adjacency", "sound_coupling", "spatial_direction", "visual_similarity", "dialogue_or_caption"]
+    },
+    "audit_status": { "enum": ["NOT_EXECUTED", "PASSED", "FAILED"] },
+    "findings": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": [
+    "boundary_id", "subject", "object", "allowed_claim_level", "source_decision_ids", "evidence_ids",
+    "affected_artifact_ids", "affected_shot_ids", "affected_prompt_ids", "audited_artifact_ids",
+    "audited_shot_ids", "audited_prompt_ids", "implication_checks", "audit_status", "findings"
+  ]
+}

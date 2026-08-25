@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvidenceClaim",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "evidence_id": { "type": "string", "pattern": "^E-" },
+    "claim": { "type": "string", "minLength": 1 },
+    "claim_class": { "enum": ["FACT", "SAMPLE_OBSERVATION", "SYSTEM_INFERENCE", "HEURISTIC", "UNKNOWN"] },
+    "claim_kind": { "enum": ["GENERAL", "LEGAL_OR_PLATFORM", "PRECISION_METRIC"] },
+    "classification": {
+      "enum": ["VERIFIED_OFFICIAL", "VERIFIED_PRIMARY_RESEARCH", "INDUSTRY_DATA", "PLATFORM_SAMPLE", "CREATOR_SIGNAL", "USER_REPORTED", "SYSTEM_INFERENCE", "HEURISTIC", "UNKNOWN"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "publisher": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "minLength": 1 }
+      },
+      "required": ["publisher", "title", "url"]
+    },
+    "published_at": { "type": "string", "minLength": 1 },
+    "effective_at": { "type": "string", "minLength": 1 },
+    "checked_at": { "type": "string", "minLength": 1 },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": { "enum": ["CURRENT", "EXPIRED", "UNKNOWN"] },
+        "valid_from": { "type": "string", "minLength": 1 },
+        "valid_until": { "type": "string", "minLength": 1 },
+        "basis": { "type": "string", "minLength": 1 }
+      },
+      "required": ["status", "valid_from", "valid_until", "basis"]
+    },
+    "actor": { "enum": ["CREATOR", "PUBLISHER", "PLATFORM", "SERVICE_PROVIDER", "MODEL_PROVIDER", "ADVERTISER", "OTHER", "UNKNOWN", null] },
+    "duty": { "type": ["string", "null"] },
+    "trigger": { "type": ["string", "null"] },
+    "exceptions_or_conditions": { "type": ["string", "null"] },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project": { "type": "string" },
+        "project_id": { "type": "string" },
+        "artifact_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "artifact_id": { "type": "string", "minLength": 1 },
+              "version": { "type": "string", "minLength": 1 }
+            },
+            "required": ["artifact_id", "version"]
+          },
+          "uniqueItems": true
+        },
+        "package_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "artifact_id": { "type": "string", "minLength": 1 },
+              "version": { "type": "string", "minLength": 1 }
+            },
+            "required": ["artifact_id", "version"]
+          },
+          "uniqueItems": true
+        },
+        "asset_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "release_package_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "provider_registry_ids": { "type": "array", "items": { "type": "string", "pattern": "^PRV-" }, "uniqueItems": true },
+        "provider": { "type": "string" },
+        "model": { "type": "string" },
+        "version": { "type": "string" },
+        "region": { "type": "string" },
+        "surface": { "type": "string" },
+        "snapshot_id": { "type": "string" },
+        "provider_checked_at": { "type": "string" },
+        "observation_ids": { "type": "array", "items": { "type": "string", "pattern": "^OBS-" }, "uniqueItems": true },
+        "gate_ids": { "type": "array", "items": { "type": "string", "pattern": "^G-" }, "uniqueItems": true },
+        "prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^PP-" }, "uniqueItems": true },
+        "shot_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "shot_plan_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "pilot_ids": { "type": "array", "items": { "type": "string", "pattern": "^PIL-" }, "uniqueItems": true },
+        "source_spec_version": { "type": "string", "minLength": 1 },
+        "version_scope": { "type": "string", "minLength": 1 },
+        "format_variant_ids": { "type": "array", "items": { "type": "string", "pattern": "^FMT-" }, "uniqueItems": true },
+        "task_scope": { "type": "string" },
+        "format_scope": { "type": "string" },
+        "publication_ids": { "type": "array", "items": { "type": "string", "pattern": "^PUB-" }, "uniqueItems": true },
+        "learning_ids": { "type": "array", "items": { "type": "string", "pattern": "^L-" }, "uniqueItems": true },
+        "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+        "reference_ids": { "type": "array", "items": { "type": "string", "pattern": "^REF-" }, "uniqueItems": true },
+        "task_types": {
+          "type": "array",
+          "items": { "enum": ["IMAGE_GENERATION", "VIDEO_GENERATION", "IMAGE_TO_VIDEO", "VIDEO_TO_VIDEO", "AUDIO", "COMPOSITING", "PACKAGING", "OTHER"] },
+          "uniqueItems": true
+        }
+      }
+    },
+    "status": { "enum": ["EFFECTIVE", "DRAFT", "SUPERSEDED", "PLATFORM_SPECIFIC", "NOT_APPLICABLE", "UNKNOWN"] },
+    "basis": { "type": "string", "minLength": 1 },
+    "metric_definition": { "type": "string", "minLength": 1 },
+    "sample_or_base": { "type": "string", "minLength": 1 },
+    "precision": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "quantity_id": { "type": "string", "pattern": "^QTY-" },
+        "value": {},
+        "unit": { "type": "string", "minLength": 1 },
+        "basis": { "type": "string", "minLength": 1 },
+        "source_or_evidence_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "precision_status": { "enum": ["USER_STATED", "VERIFIED", "EXPERIMENT_DESIGN", "HEURISTIC", "TUNABLE"] }
+      },
+      "required": ["quantity_id", "value", "unit", "basis", "source_or_evidence_ids", "precision_status"]
+    },
+    "confidence": { "enum": ["LOW", "MEDIUM", "HIGH"] },
+    "limitations": { "type": "string", "minLength": 1 }
+  },
+  "required": [
+    "evidence_id", "claim", "claim_class", "claim_kind", "classification", "source",
+    "published_at", "effective_at", "checked_at", "scope", "status", "basis",
+    "metric_definition", "sample_or_base", "confidence", "limitations"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "claim_kind": { "const": "LEGAL_OR_PLATFORM" } }, "required": ["claim_kind"] },
+      "then": {
+        "required": ["actor", "duty", "trigger", "exceptions_or_conditions"],
+        "properties": {
+          "actor": { "enum": ["CREATOR", "PUBLISHER", "PLATFORM", "SERVICE_PROVIDER", "MODEL_PROVIDER", "ADVERTISER", "OTHER", "UNKNOWN"] },
+          "duty": { "type": "string", "minLength": 1 },
+          "trigger": { "type": "string", "minLength": 1 },
+          "exceptions_or_conditions": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "claim_kind": { "const": "PRECISION_METRIC" } }, "required": ["claim_kind"] },
+      "then": { "required": ["precision"], "properties": { "precision": { "type": "object" } } }
+    },
+    {
+      "if": { "properties": { "classification": { "enum": ["VERIFIED_OFFICIAL", "VERIFIED_PRIMARY_RESEARCH"] } }, "required": ["classification"] },
+      "then": {
+        "properties": { "source": { "type": "object" } }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "precision": {
+            "type": "object",
+            "properties": { "precision_status": { "const": "VERIFIED" } },
+            "required": ["precision_status"]
+          }
+        },
+        "required": ["precision"]
+      },
+      "then": {
+        "properties": {
+          "precision": {
+            "properties": { "source_or_evidence_ids": { "minItems": 1 } }
+          }
+        }
+      }
+    }
+  ]
+}

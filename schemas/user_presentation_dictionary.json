@@ -1,0 +1,115 @@
+{
+  "dictionary_id": "silver-showrunner-user-presentation-zh-cn",
+  "dictionary_version": "1.0.0",
+  "default_profile": "CREATOR_SIMPLE",
+  "profiles": {
+    "CREATOR_SIMPLE": {
+      "maximum_information_blocks": 5,
+      "show_machine_status_codes": false,
+      "show_error_codes": false,
+      "show_internal_ids": false,
+      "show_hashes": false,
+      "show_json_keys": false,
+      "show_script_paths": false
+    }
+  },
+  "labels": {
+    "verdict": "本轮结论",
+    "completed": "本轮完成",
+    "status": "当前状态",
+    "artifact": "主产物",
+    "next_step": "下一步"
+  },
+  "project_verdicts": {
+    "TEXT_PILOT_COMPLETE": "本轮文字样片已经形成，但仍需完成后续内容复核。",
+    "TEXT_SPEC_COMPLETE": "本轮约定范围内的文字方案已经形成，但真实素材效果仍需另行验证。",
+    "PILOT_REWORK_REQUIRED": "本轮仍需返工，暂不建议进入下一阶段。",
+    "GLOBAL_READY": "全局资料已经整理，可以开始小范围文字试做。",
+    "IN_PROGRESS": "本轮工作仍在进行，已经保留可继续的进度。",
+    "COMPLETE": "本轮登记的工作已经完成，后续结论仍以各项真实检查状态为准。"
+  },
+  "project_completed": {
+    "TEXT_PILOT_COMPLETE": "已经形成本轮文字样片和可继续复核的工作稿。",
+    "TEXT_SPEC_COMPLETE": "已经形成本轮约定范围内的文字方案。",
+    "PILOT_REWORK_REQUIRED": "已经保留当前工作面、问题记录和返工入口。",
+    "GLOBAL_READY": "已经完成来源与全局资料的本轮整理。",
+    "IN_PROGRESS": "已经保存本轮完成部分和继续入口。",
+    "COMPLETE": "已经保存本轮登记的成果。"
+  },
+  "axes": {
+    "structural": {
+      "PASS": "结构检查通过",
+      "FAIL": "结构检查未通过",
+      "NOT_RUN": "尚未进行结构检查",
+      "PENDING": "结构检查尚未完成",
+      "UNKNOWN": "结构检查状态尚无法确认"
+    },
+    "content_self_review": {
+      "PASS": "文字内容已完成本轮自检",
+      "FAIL": "文字内容自检未通过",
+      "NOT_RUN": "尚未进行文字内容自检",
+      "PENDING": "文字内容自检尚未完成",
+      "UNKNOWN": "文字内容自检状态尚无法确认"
+    },
+    "editorial_review": {
+      "PASS": "另一位编辑已经完成复核",
+      "FAIL": "另一位编辑复核未通过",
+      "NOT_REVIEWED": "尚未进行另一位编辑复核",
+      "REVIEW_REQUIRED": "仍需另一位编辑复核",
+      "PENDING": "另一位编辑复核尚未完成",
+      "UNKNOWN": "编辑复核状态尚无法确认"
+    },
+    "production_validation": {
+      "PASS": "已经完成真实素材验证",
+      "VALIDATED": "已经完成真实素材验证",
+      "FAIL": "真实素材验证未通过",
+      "NOT_TESTED": "尚未进行真实素材验证",
+      "PENDING": "真实素材验证尚未完成",
+      "UNKNOWN": "真实素材验证状态尚无法确认"
+    }
+  },
+  "stage_labels": {
+    "IMAGE": "图片制作",
+    "VIDEO": "视频制作",
+    "VOICE": "配音制作",
+    "AUDIO": "声音制作",
+    "MUSIC": "音乐制作",
+    "SUBTITLE_ALIGNMENT": "字幕对齐",
+    "EDIT": "剪辑",
+    "MEDIA_QA": "真实素材检查",
+    "PUBLISH": "发布"
+  },
+  "stage_statuses": {
+    "EXCLUDED_BY_USER": "按你的要求没有执行",
+    "NOT_EXECUTED": "尚未执行",
+    "QA_NOT_EXECUTED": "尚未检查真实素材",
+    "NOT_TESTED": "尚未进行真实素材验证",
+    "PASS": "已经完成",
+    "FAIL": "未通过",
+    "UNKNOWN": "状态尚无法确认"
+  },
+  "error_categories": {
+    "source": "来源或引用仍有需要核对的问题",
+    "prompt": "导演方案或提示词仍有需要修正的问题",
+    "output": "交付文件或提交位置仍有需要修正的问题",
+    "runtime": "运行身份或执行环境仍有需要确认的问题",
+    "editorial": "内容复核仍有需要处理的问题",
+    "media": "真实素材或媒体处理仍有需要处理的问题",
+    "generic": "存在尚未完成的技术检查项"
+  },
+  "fallbacks": {
+    "unknown_verdict": "当前完成范围尚无法确认，请先核对缺失的状态记录。",
+    "unknown_completed": "已经整理现有记录，但本轮完成范围仍需确认。",
+    "missing_artifact": "当前记录没有提供可直接展示的中文成品名称。",
+    "validation_failed": "检查发现需要修正的问题，暂不建议进入下一阶段。",
+    "validation_problem": "检查发现需要处理的问题",
+    "excluded_scope_prefix": "按你的要求，本轮没有执行",
+    "unknown_next_step": "请先确认缺失的状态记录，再继续后续工作。",
+    "rework_next_step": "请先修正当前问题，再重新进行本轮检查。",
+    "editorial_next_step": "请安排另一位编辑复核本轮文字方案。",
+    "production_next_step": "如需判断真实效果，请先制作并检查少量代表性素材。",
+    "continue_next_step": "可以从已经保存的继续入口推进下一阶段。",
+    "hidden_technical_detail": "技术细节已放入机器记录",
+    "safe_artifact_replacement": "可审阅成果已保存"
+  }
+}

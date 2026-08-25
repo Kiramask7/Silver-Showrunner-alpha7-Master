@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProviderRegistryEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "provider_id": { "type": "string", "pattern": "^PRV-" },
+    "provider": { "type": "string", "minLength": 1 },
+    "display_name": { "type": "string", "minLength": 1 },
+    "marketing_aliases": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "surface": { "type": "string", "minLength": 1 },
+    "api_model_id": { "type": ["string", "null"] },
+    "snapshot_id": { "type": "string", "minLength": 1 },
+    "availability_kind": { "enum": ["API_AND_SURFACE", "API_ONLY", "SURFACE_ONLY", "UNKNOWN"] },
+    "model": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "region": { "type": "string", "minLength": 1 },
+    "access": { "enum": ["AVAILABLE", "LIMITED", "NOT_AVAILABLE", "UNKNOWN"] },
+    "access_source_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {},
+        "currency": { "type": "string", "minLength": 1 },
+        "billing_unit": { "type": "string", "minLength": 1 },
+        "tier_or_plan": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["VERIFIED_CURRENT", "USER_REPORTED", "ESTIMATE", "UNKNOWN"] },
+        "basis": { "type": "string", "minLength": 1 },
+        "source_or_evidence_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "precision_status": { "enum": ["USER_STATED", "VERIFIED", "EXPERIMENT_DESIGN", "HEURISTIC", "TUNABLE"] }
+      },
+      "required": ["value", "currency", "billing_unit", "tier_or_plan", "status", "basis", "source_or_evidence_ids", "precision_status"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "publisher": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "minLength": 1 },
+        "source_type": { "enum": ["OFFICIAL", "THIRD_PARTY", "USER_REPORTED"] }
+      },
+      "required": ["publisher", "title", "url", "source_type"]
+    },
+    "checked_at": { "type": "string", "minLength": 1 },
+    "project_pilot_status": { "enum": ["NOT_RUN", "PLANNED", "RUN_PARTIAL", "PASSED", "FAILED", "INCONCLUSIVE"] },
+    "classification": { "enum": ["VERIFIED_OFFICIAL", "USER_REPORTED", "SYSTEM_INFERENCE", "HEURISTIC", "UNKNOWN"] },
+    "modalities": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "capability_id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "claim_kind": { "enum": ["GENERAL", "EXACT_DURATION"] },
+          "status": { "enum": ["VERIFIED", "USER_REPORTED", "INFERRED", "UNKNOWN"] },
+          "source_or_evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+          "version_scope": { "type": "string", "minLength": 1 },
+          "region_scope": { "type": "string", "minLength": 1 },
+          "surface_scope": { "type": "string", "minLength": 1 },
+          "checked_at": { "type": "string", "minLength": 1 },
+          "exact_duration_seconds": { "type": ["number", "null"], "minimum": 0 }
+        },
+        "required": [
+          "capability_id", "name", "claim_kind", "status", "source_or_evidence_ids",
+          "version_scope", "region_scope", "surface_scope", "checked_at",
+          "exact_duration_seconds"
+        ],
+        "allOf": [
+          {
+            "if": { "properties": { "status": { "const": "VERIFIED" } }, "required": ["status"] },
+            "then": { "properties": { "source_or_evidence_ids": { "minItems": 1 } } }
+          },
+          {
+            "if": { "properties": { "claim_kind": { "const": "EXACT_DURATION" } }, "required": ["claim_kind"] },
+            "then": {
+              "properties": {
+                "status": { "const": "VERIFIED" },
+                "source_or_evidence_ids": { "minItems": 1 },
+                "exact_duration_seconds": { "type": "number", "exclusiveMinimum": 0 }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "claim_kind": { "const": "GENERAL" } }, "required": ["claim_kind"] },
+            "then": { "properties": { "exact_duration_seconds": { "type": "null" } } }
+          }
+        ]
+      }
+    },
+    "strengths": { "type": "array" },
+    "weaknesses": { "type": "array" },
+    "cost_latency_notes": { "type": "string" },
+    "project_observations": { "type": "array", "items": { "type": "string", "pattern": "^OBS-" }, "uniqueItems": true }
+  },
+  "required": [
+    "provider_id", "provider", "display_name", "marketing_aliases", "surface",
+    "api_model_id", "snapshot_id", "availability_kind", "model", "version", "region", "access", "access_source_ids",
+    "price", "source", "checked_at", "project_pilot_status", "classification", "modalities",
+    "capabilities", "strengths", "weaknesses", "cost_latency_notes", "project_observations"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "project_pilot_status": { "enum": ["RUN_PARTIAL", "PASSED", "FAILED", "INCONCLUSIVE"] } }, "required": ["project_pilot_status"] },
+      "then": { "properties": { "project_observations": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "project_pilot_status": { "const": "PASSED" } }, "required": ["project_pilot_status"] },
+      "then": { "properties": { "project_observations": { "minItems": 1, "items": { "type": "string", "pattern": "^OBS-" } } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "price": {
+            "properties": { "status": { "const": "VERIFIED_CURRENT" } },
+            "required": ["status"]
+          }
+        },
+        "required": ["price"]
+      },
+      "then": {
+        "properties": {
+          "price": {
+            "properties": {
+              "source_or_evidence_ids": { "minItems": 1 },
+              "precision_status": { "const": "VERIFIED" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "classification": { "const": "VERIFIED_OFFICIAL" } }, "required": ["classification"] },
+      "then": { "properties": { "source": { "properties": { "source_type": { "const": "OFFICIAL" } } } } }
+    }
+  ]
+}

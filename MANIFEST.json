@@ -1,0 +1,68 @@
+{
+  "name": "Silver-Showrunner-alpha.7-Master-v1.1.3",
+  "display_name": "Silver-Showrunner-alpha.7-Master v1.1.3",
+  "skill_name": "silver-showrunner",
+  "version": "1.1.3",
+  "build": "alpha7-master-v1.1.3",
+  "read_mode": "MODULAR_ONLY",
+  "read_mode_marker_file": "00_READ_ME_FIRST.md",
+  "read_mode_marker": "SILVER_SHOWRUNNER_READ_MODE: MODULAR_ONLY",
+  "runtime_route_registry": "schemas/runtime_route_registry.json",
+  "distribution_profile": "RUNTIME_ONLY",
+  "default_interaction_language": "zh-CN",
+  "runtime_core_project_specific_content": false,
+  "benchmark_fixtures_included": false,
+  "source_regression_fixtures_present": true,
+  "regression_fixtures_included": false,
+  "tests_included": false,
+  "build_tooling_included": false,
+  "version_history_included": false,
+  "competition_demo_included": false,
+  "source_manifest_file_count": 139,
+  "file_count": 109,
+  "payload_file_count": 109,
+  "runtime_payload_file_count": 109,
+  "runtime_added_files": [
+    "运行银幕总控.cmd",
+    "schemas/runtime_route_registry.json",
+    "schemas/user_presentation_dictionary.json",
+    "scripts/migrate_longform_contract.py",
+    "scripts/render_creator_view.py",
+    "scripts/runtime_launcher.py"
+  ],
+  "source_added_tests": [
+    "tests/run_execution_compile_tests.py",
+    "tests/run_semantic_gate_tests.py",
+    "tests/run_longform_authoring_tests.py",
+    "tests/run_creator_presentation_tests.py",
+    "tests/run_route_registry_tests.py",
+    "tests/run_release_cleanliness_tests.py",
+    "tests/run_runtime_launcher_tests.py",
+    "tests/run_master_production_tests.py",
+    "tests/run_release_fix_tests.py"
+  ],
+  "runtime_excluded_prefixes": [
+    "tests/"
+  ],
+  "runtime_excluded_files": [
+    "VERSION_NOTES.md",
+    "scripts/build_onefile.py",
+    "scripts/build_release.py",
+    "scripts/sync_embedded_schemas.py"
+  ],
+  "skill_entry": "SKILL.md",
+  "handoff_read_first": "SKILL.md",
+  "schema_draft": "2020-12",
+  "read_first": "SKILL.md",
+  "onefile_default_profile": "MANGA_CORE",
+  "onefile_delivery": "EXTERNAL_RELEASE_ARTIFACT",
+  "onefile_module_policy": "MUTUALLY_EXCLUSIVE",
+  "onefile_profiles": [
+    "MANGA_CORE",
+    "TEXT_ONLY_ECO",
+    "LONGFORM",
+    "AUX",
+    "MEDIA_RELEASE",
+    "FULL"
+  ]
+}

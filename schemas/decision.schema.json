@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Decision",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "pattern": "^D-" },
+    "topic": { "type": "string", "minLength": 1 },
+    "value": {},
+    "status": {
+      "enum": ["DRAFT", "PROPOSED", "USER_APPROVED", "VALIDATED", "LOCKED", "DEPRECATED"]
+    },
+    "source": {
+      "enum": ["USER", "SYSTEM_RECOMMENDATION", "VERIFIED_EVIDENCE", "USER_REPORTED_EVIDENCE", "TEST_ASSUMPTION"]
+    },
+    "question_id": { "type": ["string", "null"] },
+    "approval_event_id": { "type": ["string", "null"] },
+    "evidence_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "validation_basis": {
+      "type": "array",
+      "items": { "enum": ["USER_AUTHORITY", "OBSERVED_ARTIFACT", "OFFICIAL_SOURCE", "REPRESENTATIVE_PILOT", "MEASURED_DATA"] },
+      "uniqueItems": true
+    },
+    "lock_event_id": { "type": ["string", "null"] },
+    "lock_scope": { "type": ["string", "null"] },
+    "open_blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "impacts": { "type": "array" },
+    "rationale": { "type": "string" },
+    "supersedes": { "type": ["string", "null"] }
+  },
+  "required": ["id", "topic", "status", "source", "evidence_ids", "validation_basis", "open_blocking_issue_ids"],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "USER_APPROVED" } }, "required": ["status"] },
+      "then": { "required": ["approval_event_id"], "properties": { "approval_event_id": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "VALIDATED" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "evidence_ids": { "minItems": 1 },
+          "validation_basis": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "LOCKED" } }, "required": ["status"] },
+      "then": {
+        "required": ["approval_event_id", "lock_event_id", "lock_scope"],
+        "properties": {
+          "approval_event_id": { "type": "string", "minLength": 1 },
+          "evidence_ids": { "minItems": 1 },
+          "lock_event_id": { "type": "string", "minLength": 1 },
+          "lock_scope": { "type": "string", "minLength": 1 },
+          "validation_basis": { "minItems": 1 },
+          "open_blocking_issue_ids": { "maxItems": 0 }
+        }
+      }
+    }
+  ]
+}

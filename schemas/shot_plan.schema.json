@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ShotPlan",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^SP-" },
+    "source_spec_version": { "type": "string", "minLength": 1 },
+    "canonical_duration_version": { "type": "string", "minLength": 1 },
+    "format_variant_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^FMT-" },
+      "uniqueItems": true
+    },
+    "shots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "shot_id": { "type": "string", "minLength": 1 },
+          "state_in": { "type": "string", "minLength": 1 },
+          "required_event": { "type": "string", "minLength": 1 },
+          "planned_state_out": { "type": "string", "minLength": 1 },
+          "duration_seconds": { "type": "number", "minimum": 0 },
+          "duration_semantics": { "enum": ["TARGET", "EXACT_PROVIDER_BOUND"] },
+          "duration_source_or_evidence_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          },
+          "duration_provider_registry_id": { "type": ["string", "null"], "pattern": "^PRV-" },
+          "asset_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "generation_required": { "type": "boolean" },
+          "provider_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^PP-" }, "uniqueItems": true },
+          "provider_neutral_draft_ids": { "type": "array", "items": { "type": "string", "pattern": "^PD-" }, "uniqueItems": true },
+          "transform_plan_ids": { "type": "array", "items": { "type": "string", "pattern": "^TP-" }, "uniqueItems": true },
+          "neutral_execution_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^NEP-" }, "uniqueItems": true },
+          "master_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^MP-" }, "uniqueItems": true },
+          "dialogue_ids": { "type": "array", "items": { "type": "string", "pattern": "^DLG-" }, "uniqueItems": true },
+          "minor_adult_same_shot": { "type": "boolean" },
+          "minor_adult_same_shot_strategy": { "type": ["string", "null"], "enum": ["COMPOSITE", "DECOMPOSITION", null] },
+          "decomposition_shot_ids": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+          "composite_plan_artifact_id": { "type": ["string", "null"] },
+          "no_generation_reason": { "type": ["string", "null"], "minLength": 1 },
+          "protected_unknown_ids": { "type": "array", "items": { "type": "string", "pattern": "^U-" }, "uniqueItems": true },
+          "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+          "causal_boundary_ids": { "type": "array", "items": { "type": "string", "pattern": "^CB-" }, "uniqueItems": true }
+        },
+        "required": [
+          "shot_id", "state_in", "required_event", "planned_state_out",
+          "duration_seconds", "duration_semantics", "duration_source_or_evidence_ids",
+          "duration_provider_registry_id", "asset_ids", "generation_required", "provider_prompt_ids",
+          "provider_neutral_draft_ids", "master_prompt_ids", "dialogue_ids",
+          "minor_adult_same_shot", "minor_adult_same_shot_strategy",
+          "decomposition_shot_ids", "composite_plan_artifact_id", "no_generation_reason",
+          "protected_unknown_ids", "quantity_ids", "causal_boundary_ids"
+        ],
+        "allOf": [
+          {
+            "if": { "properties": { "generation_required": { "const": true } }, "required": ["generation_required"] },
+            "then": {
+              "properties": {
+                "no_generation_reason": { "type": "null" }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "generation_required": { "const": false } }, "required": ["generation_required"] },
+            "then": {
+              "properties": {
+                "provider_prompt_ids": { "maxItems": 0 },
+                "provider_neutral_draft_ids": { "maxItems": 0 },
+                "transform_plan_ids": { "maxItems": 0 },
+                "neutral_execution_prompt_ids": { "maxItems": 0 },
+                "master_prompt_ids": { "maxItems": 0 },
+                "no_generation_reason": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "duration_semantics": { "const": "EXACT_PROVIDER_BOUND" } }, "required": ["duration_semantics"] },
+            "then": {
+              "properties": {
+                "duration_source_or_evidence_ids": { "minItems": 1 },
+                "duration_provider_registry_id": { "type": "string", "pattern": "^PRV-" }
+              }
+            },
+            "else": { "properties": { "duration_provider_registry_id": { "type": "null" } } }
+          },
+          {
+            "if": { "properties": { "minor_adult_same_shot": { "const": true } }, "required": ["minor_adult_same_shot"] },
+            "then": {
+              "properties": {
+                "minor_adult_same_shot_strategy": { "enum": ["COMPOSITE", "DECOMPOSITION"] }
+              }
+            },
+            "else": {
+              "properties": {
+                "minor_adult_same_shot_strategy": { "type": "null" },
+                "decomposition_shot_ids": { "maxItems": 0 },
+                "composite_plan_artifact_id": { "type": "null" }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "minor_adult_same_shot_strategy": { "const": "COMPOSITE" } }, "required": ["minor_adult_same_shot_strategy"] },
+            "then": {
+              "properties": {
+                "generation_required": { "const": false },
+                "composite_plan_artifact_id": { "type": "string", "minLength": 1 },
+                "decomposition_shot_ids": { "maxItems": 0 }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "minor_adult_same_shot_strategy": { "const": "DECOMPOSITION" } }, "required": ["minor_adult_same_shot_strategy"] },
+            "then": {
+              "properties": {
+                "generation_required": { "const": false },
+                "decomposition_shot_ids": { "minItems": 2 },
+                "composite_plan_artifact_id": { "type": "null" }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "duration_tolerance": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit": { "enum": ["seconds", "ratio"] },
+        "basis": { "type": "string", "minLength": 1 },
+        "source_or_evidence_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "precision_status": { "enum": ["USER_STATED", "VERIFIED", "EXPERIMENT_DESIGN"] }
+      },
+      "required": ["value", "unit", "basis", "source_or_evidence_ids", "precision_status"]
+    },
+    "reuse_mode": { "enum": ["SEPARATE_RENDER", "TESTED_COMMON_SAFE_ZONE", "CROP_REFRAME_ONLY", "NOT_APPLICABLE"] },
+    "format_variants_require_different_camera": { "type": "boolean" },
+    "safe_zone_evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true }
+  },
+  "required": [
+    "id", "source_spec_version", "canonical_duration_version", "shots", "duration_tolerance",
+    "reuse_mode", "format_variants_require_different_camera", "safe_zone_evidence_ids"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "reuse_mode": { "const": "CROP_REFRAME_ONLY" },
+          "format_variants_require_different_camera": { "const": true }
+        },
+        "required": ["reuse_mode", "format_variants_require_different_camera"]
+      },
+      "then": false
+    },
+    {
+      "if": { "properties": { "reuse_mode": { "const": "TESTED_COMMON_SAFE_ZONE" } }, "required": ["reuse_mode"] },
+      "then": { "properties": { "safe_zone_evidence_ids": { "minItems": 1 } } }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QuantitySemantics",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "quantity_id": { "type": "string", "pattern": "^QTY-" },
+    "name": { "type": "string", "minLength": 1 },
+    "quantity_type": { "enum": ["RATE", "OFFSET", "DURATION", "COUNT", "PROBABILITY", "RATIO", "CURRENCY", "SAMPLE_SIZE", "THRESHOLD", "OTHER"] },
+    "value": {},
+    "unit": { "type": "string", "minLength": 1 },
+    "reference_frame": { "type": "string", "minLength": 1 },
+    "observation_window": { "type": ["object", "null"] },
+    "baseline_id": { "type": ["string", "null"], "pattern": "^BL-" },
+    "basis": { "type": "string", "minLength": 1 },
+    "derivation": { "type": "string", "minLength": 1 },
+    "source_or_evidence_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "precision_status": { "enum": ["USER_STATED", "VERIFIED", "EXPERIMENT_DESIGN", "HEURISTIC", "TUNABLE"] },
+    "display_mapping": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "display_quantity_type": { "enum": ["OFFSET", "DURATION", "COUNT", "RATIO", "OTHER"] },
+        "value": {},
+        "unit": { "type": "string", "minLength": 1 },
+        "observation_window": { "type": "object" },
+        "derivation": { "type": "string", "minLength": 1 },
+        "source_or_evidence_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true }
+      },
+      "required": ["display_quantity_type", "value", "unit", "observation_window", "derivation", "source_or_evidence_ids"]
+    },
+    "used_in_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "used_in_shot_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "used_in_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^(MP|PD|PP)-" }, "uniqueItems": true }
+  },
+  "required": [
+    "quantity_id", "name", "quantity_type", "value", "unit", "reference_frame", "observation_window",
+    "baseline_id", "basis", "derivation", "source_or_evidence_ids", "precision_status", "display_mapping",
+    "used_in_artifact_ids", "used_in_shot_ids", "used_in_prompt_ids"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "precision_status": { "const": "VERIFIED" } }, "required": ["precision_status"] },
+      "then": { "properties": { "source_or_evidence_ids": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "quantity_type": { "const": "RATE" }, "used_in_shot_ids": { "minItems": 1 } }, "required": ["quantity_type", "used_in_shot_ids"] },
+      "then": { "properties": { "display_mapping": { "type": "object" } } }
+    }
+  ]
+}

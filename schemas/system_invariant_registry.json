@@ -1,0 +1,18 @@
+{
+  "registry_version": "system-invariant-catalog-1.0.0",
+  "compatibility_provenance": "Stable invariant IDs introduced before Alpha.7 and carried forward unchanged.",
+  "invariants": [
+    { "invariant_id": "INV-UPSTREAM-COMPLETENESS", "scope": "制作规格与批量生成输入必须完整，并保持内部引用可解析。" },
+    { "invariant_id": "INV-GATE-TRUTH", "scope": "关卡执行、结果、要求与证据必须可审计且不得循环自证。" },
+    { "invariant_id": "INV-MEDIA-OBSERVATION", "scope": "媒体结论必须回链可访问的真实产物与观察。" },
+    { "invariant_id": "INV-REPAIR-CLOSURE", "scope": "修复关闭必须形成真实新产物、新观察与重新评估的关卡。" },
+    { "invariant_id": "INV-RELEASE-SEQUENCE", "scope": "发布准备必须先于发布证据评估，且不得要求预先存在公开链接。" },
+    { "invariant_id": "INV-PUBLICATION-PROVENANCE", "scope": "已发布状态必须回链实际成片、发布包与发布证据。" },
+    { "invariant_id": "INV-LEARNING-PROVENANCE", "scope": "已验证学习必须回链真实发布、分析数据产物与证据。" },
+    { "invariant_id": "INV-PROTECTED-UNKNOWN", "scope": "受保护未知项不得在下游未经批准或证据具体化。" },
+    { "invariant_id": "INV-QUANTITY-SEMANTICS", "scope": "精确量必须区分数量类型、观察窗口、基准和银幕映射。" },
+    { "invariant_id": "INV-PROMPT-COVERAGE", "scope": "计划生成镜头与逐镜 Prompt 覆盖必须形成集合等式。" },
+    { "invariant_id": "INV-CAUSAL-BOUNDARY", "scope": "相关性与未知关系必须同时审计画面和声音造成的因果暗示。" },
+    { "invariant_id": "INV-BENCHMARK-ISOLATION", "scope": "Benchmark 产物不得进入真实项目资产、镜头、Prompt、依赖或预算。" }
+  ]
+}

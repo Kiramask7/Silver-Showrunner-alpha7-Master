@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MediaObservation",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "observation_id": { "type": "string", "pattern": "^OBS-" },
+    "artifact_id": { "type": "string", "minLength": 1 },
+    "artifact_version": { "type": ["string", "null"], "minLength": 1 },
+    "provider_registry_id": { "type": ["string", "null"], "pattern": "^PRV-" },
+    "task_scope": { "type": ["string", "null"], "minLength": 1 },
+    "observer": { "enum": ["SYSTEM", "USER", "TOOL", "EXTERNAL_REVIEWER"] },
+    "basis": { "enum": ["DIRECT_MEDIA_ACCESS", "USER_REPORTED", "MEASURED_DATA"] },
+    "media_accessible": { "type": "boolean" },
+    "observed_at": { "type": ["string", "null"] },
+    "findings": { "type": "array", "items": { "type": "object" } },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "ncs": {
+      "oneOf": [
+        { "const": "NOT_SCORED" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "number" },
+            "scale": { "type": "string", "minLength": 1 },
+            "scoring_config_id": { "type": "string", "minLength": 1 },
+            "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "minItems": 1, "uniqueItems": true }
+          },
+          "required": ["value", "scale", "scoring_config_id", "evidence_ids"]
+        }
+      ]
+    },
+    "nrs": {
+      "oneOf": [
+        { "const": "NOT_SCORED" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "number" },
+            "scale": { "type": "string", "minLength": 1 },
+            "scoring_config_id": { "type": "string", "minLength": 1 },
+            "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "minItems": 1, "uniqueItems": true }
+          },
+          "required": ["value", "scale", "scoring_config_id", "evidence_ids"]
+        }
+      ]
+    }
+  },
+  "required": ["observation_id", "artifact_id", "artifact_version", "observer", "basis", "media_accessible", "observed_at", "findings", "evidence_ids", "ncs", "nrs"],
+  "allOf": [
+    {
+      "if": { "properties": { "media_accessible": { "const": false } }, "required": ["media_accessible"] },
+      "then": {
+        "properties": {
+          "observer": { "const": "USER" },
+          "basis": { "const": "USER_REPORTED" },
+          "observed_at": { "type": "null" },
+          "ncs": { "const": "NOT_SCORED" },
+          "nrs": { "const": "NOT_SCORED" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "media_accessible": { "const": true } }, "required": ["media_accessible"] },
+      "then": {
+        "required": ["artifact_version"],
+        "properties": {
+          "artifact_version": { "type": "string", "minLength": 1 },
+          "basis": { "enum": ["DIRECT_MEDIA_ACCESS", "MEASURED_DATA"] },
+          "observed_at": { "type": "string", "minLength": 1 },
+          "evidence_ids": { "minItems": 1 }
+        }
+      }
+    }
+  ]
+}

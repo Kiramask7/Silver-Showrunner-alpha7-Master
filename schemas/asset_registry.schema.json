@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AssetRegistryEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "asset_type": { "enum": ["CHARACTER", "LOCATION", "PROP", "SOUND", "GRAPHIC", "STYLE_REFERENCE", "OTHER"] },
+    "subject_age_class": { "enum": ["MINOR", "ADULT", "UNKNOWN", "NOT_APPLICABLE"] },
+    "minor_safety_profile_id": { "type": ["string", "null"], "pattern": "^MIN-" },
+    "version": { "type": "string", "minLength": 1 },
+    "source_spec_version": { "type": "string", "minLength": 1 },
+    "provenance": { "type": "object" },
+    "shot_refs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "dependency_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "real_file_location": { "type": ["string", "null"] },
+    "locked_features": { "type": "array" },
+    "variable_features": { "type": "array" },
+    "approved_variants": { "type": "array" },
+    "ownership_state": { "type": ["string", "null"] },
+    "spatial_state": { "type": ["string", "null"] },
+    "contact_state": { "type": ["string", "null"] },
+    "observation_ids": { "type": "array", "items": { "type": "string", "pattern": "^OBS-" }, "uniqueItems": true },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "deprecated_versions": { "type": "array" },
+    "superseded_by": { "type": ["string", "null"] },
+    "status": { "enum": ["PROPOSED", "REGISTERED", "REAL_ARTIFACT_AVAILABLE", "VALIDATED", "DEPRECATED"] },
+    "artifact_id": { "type": ["string", "null"] },
+    "protected_unknown_ids": { "type": "array", "items": { "type": "string", "pattern": "^U-" }, "uniqueItems": true },
+    "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+    "causal_boundary_ids": { "type": "array", "items": { "type": "string", "pattern": "^CB-" }, "uniqueItems": true },
+    "benchmark_case_id": { "type": ["string", "null"], "pattern": "^BM-" }
+  },
+  "required": [
+    "id", "asset_type", "subject_age_class", "minor_safety_profile_id",
+    "version", "source_spec_version", "provenance", "shot_refs",
+    "dependency_ids", "real_file_location", "locked_features", "variable_features",
+    "approved_variants", "ownership_state", "spatial_state", "contact_state",
+    "observation_ids", "evidence_ids", "deprecated_versions", "superseded_by", "status",
+    "protected_unknown_ids", "quantity_ids", "causal_boundary_ids", "benchmark_case_id"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "asset_type": { "const": "CHARACTER" } }, "required": ["asset_type"] },
+      "then": {
+        "properties": {
+          "subject_age_class": { "enum": ["MINOR", "ADULT", "UNKNOWN"] }
+        }
+      },
+      "else": {
+        "properties": {
+          "subject_age_class": { "const": "NOT_APPLICABLE" },
+          "minor_safety_profile_id": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "subject_age_class": { "const": "MINOR" } }, "required": ["subject_age_class"] },
+      "then": { "properties": { "minor_safety_profile_id": { "type": "string", "pattern": "^MIN-" } } },
+      "else": { "properties": { "minor_safety_profile_id": { "type": "null" } } }
+    }
+  ]
+}

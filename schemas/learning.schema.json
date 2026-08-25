@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LearningRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "learning_id": { "type": "string", "pattern": "^L-" },
+    "publication_ids": { "type": "array", "items": { "type": "string", "pattern": "^PUB-" }, "uniqueItems": true },
+    "analytics_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "hypothesis": { "type": "string", "minLength": 1 },
+    "intervention": { "type": "string", "minLength": 1 },
+    "context": { "type": "object" },
+    "sample": { "type": "object" },
+    "outcome": { "type": ["object", "null"] },
+    "confidence": { "enum": ["LOW", "MEDIUM", "HIGH"] },
+    "conclusion": { "enum": ["INCONCLUSIVE", "SUPPORTED", "NOT_SUPPORTED", "MIXED"] },
+    "reusable": { "enum": ["YES", "NO", "CONDITIONAL", "UNKNOWN"] },
+    "real_data_evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "limitations": { "type": "string", "minLength": 1 },
+    "next_test": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["LEARNING_PLAN", "DATA_COLLECTION_PENDING", "DATA_AVAILABLE", "LEARNING_DRAFT", "LEARNING_VALIDATED"] }
+  },
+  "required": [
+    "learning_id", "publication_ids", "analytics_artifact_ids", "hypothesis", "intervention", "context", "sample", "outcome",
+    "confidence", "conclusion", "reusable", "real_data_evidence_ids", "limitations", "next_test", "status"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "LEARNING_VALIDATED" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "context": { "minProperties": 1 },
+          "sample": { "minProperties": 1 },
+          "outcome": { "type": "object", "minProperties": 1 },
+          "publication_ids": { "minItems": 1 },
+          "analytics_artifact_ids": { "minItems": 1 },
+          "real_data_evidence_ids": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "enum": ["LEARNING_PLAN", "DATA_COLLECTION_PENDING"] } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "outcome": { "type": "null" },
+          "conclusion": { "const": "INCONCLUSIVE" }
+        }
+      }
+    }
+  ]
+}

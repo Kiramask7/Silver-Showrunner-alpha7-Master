@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExecutionReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "receipt_id": { "type": "string", "pattern": "^RCP-" },
+    "task_id": { "type": "string", "pattern": "^TSK-" },
+    "execution_route": { "enum": ["LOCAL_TOOL", "BROWSER", "API", "MANUAL", "SIMULATION"] },
+    "execution_mode": { "enum": ["REAL", "SIMULATION"] },
+    "execution_domain": { "enum": ["PRODUCTION_MEDIA", "LOCAL_VALIDATION", "LOCAL_TEXT_TOOL"] },
+    "executor": { "type": "string", "minLength": 1 },
+    "provider_registry_id": { "type": ["string", "null"], "pattern": "^PRV-" },
+    "provider_snapshot_id": { "type": ["string", "null"] },
+    "provider_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^PP-" }, "uniqueItems": true },
+    "source_spec_versions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "started_at": { "type": "string", "minLength": 1 },
+    "completed_at": { "type": ["string", "null"] },
+    "result": { "enum": ["RUNNING", "SUCCEEDED", "FAILED", "BLOCKED", "SIMULATED_ONLY", "CANCELLED"] },
+    "request_scope": { "type": "string", "minLength": 1 },
+    "input_artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 }
+        },
+        "required": ["artifact_id", "version"]
+      },
+      "uniqueItems": true
+    },
+    "output_artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 }
+        },
+        "required": ["artifact_id", "version"]
+      },
+      "uniqueItems": true
+    },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "external_locator": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "uri": { "type": "string", "minLength": 1 },
+        "content_or_job_id": { "type": ["string", "null"] }
+      },
+      "required": ["uri", "content_or_job_id"]
+    },
+    "blocked_reason": { "type": ["string", "null"] },
+    "authorization_class": { "enum": ["NONE", "LOGIN", "CAPTCHA", "PAYMENT", "ACCOUNT_PERMISSION", "IRREVERSIBLE_ACTION"] },
+    "authorization_status": { "enum": ["NOT_REQUIRED", "REQUIRED_NOT_GRANTED", "GRANTED"] },
+    "approval_event_id": { "type": ["string", "null"] },
+    "reversible": { "type": "boolean" }
+  },
+  "required": [
+    "receipt_id", "task_id", "execution_route", "execution_mode", "executor",
+    "provider_registry_id", "provider_snapshot_id", "provider_prompt_ids",
+    "started_at", "completed_at", "result", "request_scope",
+    "input_artifact_refs", "output_artifact_refs", "evidence_ids", "external_locator",
+    "blocked_reason", "authorization_class", "authorization_status", "approval_event_id", "reversible"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "result": { "const": "RUNNING" } }, "required": ["result"] },
+      "then": {
+        "properties": {
+          "execution_mode": { "const": "REAL" },
+          "completed_at": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "result": { "const": "SUCCEEDED" } }, "required": ["result"] },
+      "then": {
+        "properties": {
+          "execution_mode": { "const": "REAL" },
+          "completed_at": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "result": { "const": "FAILED" } }, "required": ["result"] },
+      "then": {
+        "properties": {
+          "execution_mode": { "const": "REAL" },
+          "completed_at": { "type": "string", "minLength": 1 },
+          "blocked_reason": { "type": "string", "minLength": 1 },
+          "evidence_ids": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "result": { "const": "SIMULATED_ONLY" } }, "required": ["result"] },
+      "then": {
+        "properties": {
+          "execution_route": { "const": "SIMULATION" },
+          "execution_mode": { "const": "SIMULATION" },
+          "output_artifact_refs": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "result": { "const": "BLOCKED" } }, "required": ["result"] },
+      "then": { "properties": { "blocked_reason": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": { "properties": { "authorization_class": { "const": "NONE" } }, "required": ["authorization_class"] },
+      "then": { "properties": { "authorization_status": { "const": "NOT_REQUIRED" } } },
+      "else": {
+        "properties": { "authorization_status": { "enum": ["REQUIRED_NOT_GRANTED", "GRANTED"] } }
+      }
+    },
+    {
+      "if": { "properties": { "authorization_status": { "const": "GRANTED" } }, "required": ["authorization_status"] },
+      "then": { "properties": { "approval_event_id": { "type": "string", "minLength": 1 } } }
+    }
+  ]
+}

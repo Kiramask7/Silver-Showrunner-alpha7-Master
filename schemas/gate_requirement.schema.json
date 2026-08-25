@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GateRequirement",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "requirement_id": { "type": "string", "pattern": "^GR-" },
+    "gate_id": { "type": "string", "pattern": "^G-" },
+    "description": { "type": "string", "minLength": 1 },
+    "requirement_source": {
+      "enum": ["SYSTEM_INVARIANT", "USER_APPROVED_DECISION", "VERIFIED_EVIDENCE", "APPLICABLE_RULE"]
+    },
+    "source_id": { "type": "string", "minLength": 1 },
+    "invariant_id": { "type": ["string", "null"], "pattern": "^INV-[A-Z0-9_-]+$" },
+    "mandatory": { "const": true }
+  },
+  "required": ["requirement_id", "gate_id", "description", "requirement_source", "source_id", "mandatory"],
+  "allOf": [
+    {
+      "if": { "properties": { "requirement_source": { "const": "SYSTEM_INVARIANT" } }, "required": ["requirement_source"] },
+      "then": {
+        "required": ["invariant_id"],
+        "properties": {
+          "invariant_id": { "type": "string", "pattern": "^INV-[A-Z0-9_-]+$" }
+        }
+      },
+      "else": { "properties": { "invariant_id": { "type": "null" } } }
+    }
+  ]
+}

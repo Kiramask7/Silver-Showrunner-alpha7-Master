@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GateEvaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "gate_id": { "type": "string", "pattern": "^G-" },
+    "gate_type": {
+      "enum": [
+        "GENERATION_READINESS_GATE",
+        "ASSET_GATE",
+        "SHOT_GATE",
+        "SEQUENCE_CONTINUITY_GATE",
+        "FINAL_ARTIFACT_GATE",
+        "RELEASE_READINESS_GATE",
+        "PUBLICATION_EVIDENCE_GATE",
+        "LEARNING_GATE"
+      ]
+    },
+    "readiness_scope": { "enum": ["MICRO_PILOT", "BATCH_PRODUCTION", null] },
+    "scope": { "type": "string", "minLength": 1 },
+    "scope_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "asset_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "release_package_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "provider_registry_ids": { "type": "array", "items": { "type": "string", "pattern": "^PRV-" }, "uniqueItems": true },
+        "pilot_ids": { "type": "array", "items": { "type": "string", "pattern": "^PIL-" }, "uniqueItems": true },
+        "shot_plan_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "format_variant_ids": { "type": "array", "items": { "type": "string", "pattern": "^FMT-" }, "uniqueItems": true },
+        "task_types": {
+          "type": "array",
+          "items": { "enum": ["IMAGE_GENERATION", "VIDEO_GENERATION", "IMAGE_TO_VIDEO", "VIDEO_TO_VIDEO", "AUDIO", "COMPOSITING", "PACKAGING", "OTHER"] },
+          "uniqueItems": true
+        },
+        "prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^PP-" }, "uniqueItems": true },
+        "observation_ids": { "type": "array", "items": { "type": "string", "pattern": "^OBS-" }, "uniqueItems": true },
+        "artifact_versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "artifact_id": { "type": "string", "minLength": 1 },
+              "version": { "type": "string", "minLength": 1 }
+            },
+            "required": ["artifact_id", "version"]
+          },
+          "uniqueItems": true
+        },
+        "task_scope": { "type": ["string", "null"], "minLength": 1 },
+        "format_scope": { "type": ["string", "null"], "minLength": 1 },
+        "version_scope": { "type": ["string", "null"], "minLength": 1 }
+      },
+      "required": [
+        "artifact_ids", "asset_ids", "release_package_ids", "provider_registry_ids", "pilot_ids",
+        "shot_plan_ids", "format_variant_ids", "task_types", "prompt_ids", "observation_ids", "artifact_versions",
+        "task_scope", "format_scope", "version_scope"
+      ]
+    },
+    "evaluation_status": { "const": "EXECUTED" },
+    "outcome": { "enum": ["PASSED", "FAILED", "BLOCKED", "ACCEPTED_WITH_DEBT", "NOT_APPLICABLE"] },
+    "requirement_ids": { "type": "array", "items": { "type": "string", "pattern": "^GR-" }, "minItems": 1, "uniqueItems": true },
+    "requirement_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "requirement_id": { "type": "string", "pattern": "^GR-" },
+          "result": { "enum": ["SATISFIED", "UNSATISFIED", "BLOCKED", "NOT_APPLICABLE"] },
+          "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+          "blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+        },
+        "required": ["requirement_id", "result", "evidence_ids", "blocking_issue_ids"],
+        "allOf": [
+          {
+            "if": { "properties": { "result": { "const": "SATISFIED" } }, "required": ["result"] },
+            "then": { "properties": { "evidence_ids": { "minItems": 1 }, "blocking_issue_ids": { "maxItems": 0 } } }
+          },
+          {
+            "if": { "properties": { "result": { "const": "UNSATISFIED" } }, "required": ["result"] },
+            "then": { "properties": { "evidence_ids": { "minItems": 1 } } }
+          },
+          {
+            "if": { "properties": { "result": { "const": "BLOCKED" } }, "required": ["result"] },
+            "then": { "properties": { "blocking_issue_ids": { "minItems": 1 } } }
+          },
+          {
+            "if": { "properties": { "result": { "const": "NOT_APPLICABLE" } }, "required": ["result"] },
+            "then": { "properties": { "evidence_ids": { "minItems": 1 }, "blocking_issue_ids": { "maxItems": 0 } } }
+          }
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "publication_ids": { "type": "array", "items": { "type": "string", "pattern": "^PUB-" }, "uniqueItems": true },
+    "learning_ids": { "type": "array", "items": { "type": "string", "pattern": "^L-" }, "uniqueItems": true },
+    "blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "evaluated_at": { "type": ["string", "null"] },
+    "acceptance_debt": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "risk": { "type": "string", "minLength": 1 },
+        "impact": { "type": "string", "minLength": 1 },
+        "approval_event_id": { "type": "string", "minLength": 1 },
+        "revisit_condition": { "type": "string", "minLength": 1 }
+      },
+      "required": ["risk", "impact", "approval_event_id", "revisit_condition"]
+    }
+  },
+  "required": [
+    "gate_id", "gate_type", "scope", "scope_bindings", "evaluation_status", "outcome",
+    "requirement_ids", "requirement_results", "evidence_ids", "publication_ids", "learning_ids", "blocking_issue_ids", "evaluated_at"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "evaluation_status": { "const": "EXECUTED" } }, "required": ["evaluation_status"] },
+      "then": {
+        "properties": {
+          "outcome": { "enum": ["PASSED", "FAILED", "BLOCKED", "ACCEPTED_WITH_DEBT", "NOT_APPLICABLE"] },
+          "evaluated_at": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "PASSED" } }, "required": ["outcome"] },
+      "then": {
+        "properties": {
+          "evidence_ids": { "minItems": 1 },
+          "blocking_issue_ids": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "FAILED" } }, "required": ["outcome"] },
+      "then": { "properties": { "evidence_ids": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "BLOCKED" } }, "required": ["outcome"] },
+      "then": { "properties": { "blocking_issue_ids": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "NOT_APPLICABLE" } }, "required": ["outcome"] },
+      "then": { "properties": { "evidence_ids": { "minItems": 1 }, "blocking_issue_ids": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "ACCEPTED_WITH_DEBT" } }, "required": ["outcome"] },
+      "then": {
+        "required": ["acceptance_debt"],
+        "properties": {
+          "evidence_ids": { "minItems": 1 },
+          "acceptance_debt": { "type": "object" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "gate_type": { "const": "GENERATION_READINESS_GATE" } }, "required": ["gate_type"] },
+      "then": { "required": ["readiness_scope"], "properties": { "readiness_scope": { "enum": ["MICRO_PILOT", "BATCH_PRODUCTION"] } } },
+      "else": { "properties": { "readiness_scope": { "type": "null" } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_type": { "const": "PUBLICATION_EVIDENCE_GATE" },
+          "outcome": { "const": "PASSED" }
+        },
+        "required": ["gate_type", "outcome"]
+      },
+      "then": { "properties": { "publication_ids": { "minItems": 1 } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_type": { "const": "LEARNING_GATE" },
+          "outcome": { "const": "PASSED" }
+        },
+        "required": ["gate_type", "outcome"]
+      },
+      "then": {
+        "properties": {
+          "publication_ids": { "minItems": 1 },
+          "learning_ids": { "minItems": 1 }
+        }
+      }
+    }
+  ]
+}

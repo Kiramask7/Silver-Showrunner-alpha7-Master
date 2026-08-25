@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProjectRoute",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "route_id": { "type": "string", "pattern": "^ROUTE-" },
+    "project_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "NARRATIVE_SHORT", "SERIES_LONGFORM", "DOCUMENTARY_NONFICTION",
+          "CULTURE_HERITAGE", "SCIENCE_RESEARCH_EXPLAINER",
+          "EDUCATION_PUBLIC_INTEREST", "BRAND_PRODUCT", "PORTFOLIO_DEMO", "HYBRID"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "content_truth_mode": { "enum": ["FICTION", "NONFICTION", "MIXED"] },
+    "narrative_scale": { "enum": ["SHORT_FORM", "EPISODIC", "LONGFORM", "CAMPAIGN", "MODULAR"] },
+    "target_deliverables": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "CONCEPT", "SCRIPT", "STORYBOARD", "IMAGE_ASSETS", "VIDEO", "AUDIO",
+          "EDIT_TIMELINE", "RELEASE_PACKAGE", "PREFLIGHT_REPORT", "OTHER"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source_fidelity_required": { "type": "boolean" },
+    "primary_source_artifact_ids": {
+      "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true
+    },
+    "status": { "enum": ["PROPOSED", "USER_APPROVED", "VALIDATED"] },
+    "source_decision_id": { "type": ["string", "null"], "pattern": "^D-" },
+    "evidence_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true
+    },
+    "rationale": { "type": "string", "minLength": 1 }
+  },
+  "required": [
+    "route_id", "project_types", "content_truth_mode", "narrative_scale",
+    "target_deliverables", "source_fidelity_required", "primary_source_artifact_ids",
+    "status", "source_decision_id", "evidence_ids", "rationale"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "content_truth_mode": { "enum": ["NONFICTION", "MIXED"] } },
+        "required": ["content_truth_mode"]
+      },
+      "then": { "properties": { "source_fidelity_required": { "const": true } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "USER_APPROVED" } }, "required": ["status"] },
+      "then": {
+        "properties": { "source_decision_id": { "type": "string", "pattern": "^D-" } }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "VALIDATED" } }, "required": ["status"] },
+      "then": { "properties": { "evidence_ids": { "minItems": 1 } } }
+    }
+  ]
+}
+

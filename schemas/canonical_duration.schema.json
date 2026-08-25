@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CanonicalDuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "value": { "type": "number", "minimum": 0 },
+    "unit": { "const": "seconds" },
+    "version": { "type": "string", "minLength": 1 },
+    "basis": { "type": "string", "minLength": 1 },
+    "source_or_evidence_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "precision_status": { "enum": ["USER_STATED", "VERIFIED", "EXPERIMENT_DESIGN", "HEURISTIC", "TUNABLE"] }
+  },
+  "required": ["value", "unit", "version", "basis", "source_or_evidence_ids", "precision_status"],
+  "allOf": [
+    {
+      "if": { "properties": { "precision_status": { "const": "VERIFIED" } }, "required": ["precision_status"] },
+      "then": { "properties": { "source_or_evidence_ids": { "minItems": 1 } } }
+    }
+  ]
+}

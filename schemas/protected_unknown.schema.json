@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProtectedUnknown",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "unknown_id": { "type": "string", "pattern": "^U-" },
+    "topic": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["UNKNOWN", "RESOLVED"] },
+    "resolution_value": {},
+    "resolution_basis": { "enum": ["NONE", "USER_APPROVAL", "VERIFIED_EVIDENCE"] },
+    "approval_event_id": { "type": ["string", "null"] },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "affected_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "affected_shot_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "affected_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^(MP|PD|PP)-" }, "uniqueItems": true },
+    "audited_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "audited_shot_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "audited_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^(MP|PD|PP)-" }, "uniqueItems": true },
+    "audit_status": { "enum": ["NOT_EXECUTED", "PASSED", "FAILED"] },
+    "concrete_value_detected": { "type": "boolean" },
+    "findings": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": [
+    "unknown_id", "topic", "status", "resolution_basis", "approval_event_id", "evidence_ids",
+    "affected_artifact_ids", "affected_shot_ids", "affected_prompt_ids", "audited_artifact_ids",
+    "audited_shot_ids", "audited_prompt_ids", "audit_status", "concrete_value_detected", "findings"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "UNKNOWN" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "resolution_basis": { "const": "NONE" },
+          "approval_event_id": { "type": "null" },
+          "evidence_ids": { "maxItems": 0 },
+          "concrete_value_detected": { "const": false }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "RESOLVED" } }, "required": ["status"] },
+      "then": {
+        "required": ["resolution_value"],
+        "properties": { "resolution_basis": { "enum": ["USER_APPROVAL", "VERIFIED_EVIDENCE"] } }
+      }
+    },
+    {
+      "if": { "properties": { "resolution_basis": { "const": "USER_APPROVAL" } }, "required": ["resolution_basis"] },
+      "then": { "properties": { "approval_event_id": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": { "properties": { "resolution_basis": { "const": "VERIFIED_EVIDENCE" } }, "required": ["resolution_basis"] },
+      "then": { "properties": { "evidence_ids": { "minItems": 1 } } }
+    }
+  ]
+}

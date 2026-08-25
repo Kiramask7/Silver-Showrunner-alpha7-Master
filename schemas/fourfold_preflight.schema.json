@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FourfoldPreflight",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "preflight_id": { "type": "string", "pattern": "^PF-" },
+    "checkpoint": { "enum": ["EARLY", "IN_PROCESS", "FINAL"] },
+    "artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 },
+          "sha256": { "type": ["string", "null"], "pattern": "^[A-Fa-f0-9]{64}$" }
+        },
+        "required": ["artifact_id", "version", "sha256"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "target_markets": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "target_channels": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "naturalness": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": { "enum": ["PASS", "REWORK", "BLOCKED", "NOT_EVALUATED"] },
+            "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
+            "score_basis": { "enum": ["RUBRIC", "HEURISTIC", "MEASURED", "NOT_SCORED"] },
+            "rubric_version": { "type": ["string", "null"] },
+            "findings": { "type": "array", "items": { "type": "string" } },
+            "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+            "blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+          },
+          "required": ["status", "score", "score_basis", "rubric_version", "findings", "evidence_ids", "blocking_issue_ids"]
+        },
+        "compliance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": { "enum": ["PASS", "REWORK", "BLOCKED", "NOT_EVALUATED"] },
+            "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
+            "score_basis": { "enum": ["RUBRIC", "HEURISTIC", "MEASURED", "NOT_SCORED"] },
+            "rubric_version": { "type": ["string", "null"] },
+            "findings": { "type": "array", "items": { "type": "string" } },
+            "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+            "blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+          },
+          "required": ["status", "score", "score_basis", "rubric_version", "findings", "evidence_ids", "blocking_issue_ids"]
+        },
+        "rights": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": { "enum": ["PASS", "REWORK", "BLOCKED", "NOT_EVALUATED"] },
+            "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
+            "score_basis": { "enum": ["RUBRIC", "HEURISTIC", "MEASURED", "NOT_SCORED"] },
+            "rubric_version": { "type": ["string", "null"] },
+            "findings": { "type": "array", "items": { "type": "string" } },
+            "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+            "blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+          },
+          "required": ["status", "score", "score_basis", "rubric_version", "findings", "evidence_ids", "blocking_issue_ids"]
+        },
+        "propagation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": { "enum": ["PASS", "REWORK", "BLOCKED", "NOT_EVALUATED"] },
+            "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
+            "score_basis": { "enum": ["RUBRIC", "HEURISTIC", "MEASURED", "NOT_SCORED"] },
+            "rubric_version": { "type": ["string", "null"] },
+            "findings": { "type": "array", "items": { "type": "string" } },
+            "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+            "blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+          },
+          "required": ["status", "score", "score_basis", "rubric_version", "findings", "evidence_ids", "blocking_issue_ids"]
+        }
+      },
+      "required": ["naturalness", "compliance", "rights", "propagation"]
+    },
+    "overall_outcome": { "enum": ["PASS", "REWORK", "BLOCKED"] },
+    "propagation_claim_boundary": { "const": "READINESS_NOT_OUTCOME_PROBABILITY" },
+    "execution_mode": { "enum": ["REAL", "SIMULATION"] },
+    "checked_at": { "type": "string", "minLength": 1 },
+    "checker": { "type": "string", "minLength": 1 },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true },
+    "analysis_limitations": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+  },
+  "required": [
+    "preflight_id", "checkpoint", "artifact_refs", "target_markets", "target_channels",
+    "checks", "overall_outcome", "propagation_claim_boundary", "execution_mode",
+    "checked_at", "checker", "evidence_ids", "analysis_limitations"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "checkpoint": { "const": "FINAL" } }, "required": ["checkpoint"] },
+      "then": {
+        "properties": {
+          "execution_mode": { "const": "REAL" },
+          "artifact_refs": {
+            "items": {
+              "properties": { "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" } },
+              "required": ["sha256"]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

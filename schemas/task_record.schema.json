@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TaskRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "task_id": { "type": "string", "pattern": "^TSK-" },
+    "domain": {
+      "enum": [
+        "DISCOVERY", "EVIDENCE", "STORY", "LONGFORM_CONTINUITY", "FEASIBILITY",
+        "ASSET", "STORYBOARD", "PROMPT", "GENERATION", "AUDIO", "EDIT",
+        "OBSERVATION", "QA", "REPAIR", "FOURFOLD_PREFLIGHT", "PACKAGING", "OTHER"
+      ]
+    },
+    "task_type": {
+      "enum": [
+        "ANALYZE", "WRITE", "RESEARCH", "IMAGE_GENERATION", "VIDEO_GENERATION",
+        "IMAGE_TO_VIDEO", "VIDEO_TO_VIDEO", "AUDIO_GENERATION", "VOICE_SYNTHESIS",
+        "TRANSCRIPTION", "SUBTITLE", "EDIT_TIMELINE", "RENDER", "MEDIA_QA",
+        "REPAIR", "PREFLIGHT", "EXPORT", "OTHER"
+      ]
+    },
+    "execution_route": { "enum": ["INTERNAL_REASONING", "LOCAL_TOOL", "BROWSER", "API", "MANUAL", "SIMULATION"] },
+    "status": { "enum": ["PLANNED", "READY", "RUNNING", "BLOCKED", "EXECUTED_SUCCEEDED", "EXECUTED_FAILED", "SIMULATED_ONLY", "SKIPPED"] },
+    "depends_on_task_ids": { "type": "array", "items": { "type": "string", "pattern": "^TSK-" }, "uniqueItems": true },
+    "input_artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 }
+        },
+        "required": ["artifact_id", "version"]
+      },
+      "uniqueItems": true
+    },
+    "required_decision_ids": { "type": "array", "items": { "type": "string", "pattern": "^D-" }, "uniqueItems": true },
+    "provider_registry_ids": { "type": "array", "items": { "type": "string", "pattern": "^PRV-" }, "uniqueItems": true },
+    "master_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^MP-" }, "uniqueItems": true },
+    "provider_neutral_draft_ids": { "type": "array", "items": { "type": "string", "pattern": "^PD-" }, "uniqueItems": true },
+    "transform_plan_ids": { "type": "array", "items": { "type": "string", "pattern": "^TP-" }, "uniqueItems": true },
+    "neutral_execution_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^NEP-" }, "uniqueItems": true },
+    "provider_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^PP-" }, "uniqueItems": true },
+    "generation_targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target_type": { "enum": ["ASSET", "SHOT"] },
+          "target_id": { "type": "string", "minLength": 1 },
+          "source_spec_version": { "type": "string", "minLength": 1 },
+          "generation_role": { "enum": ["ASSET_REFERENCE", "ASSET_MOTION_REFERENCE", "SHOT_KEYFRAME", "SHOT_START_FRAME", "SHOT_END_FRAME", "SHOT_MOTION", "SHOT_COMPOSITE_LAYER", "CUSTOM"] },
+          "generation_medium": { "enum": ["IMAGE", "VIDEO"] },
+          "provider_prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^PP-" }, "minItems": 1, "uniqueItems": true }
+        },
+        "required": ["target_type", "target_id", "source_spec_version", "generation_role", "generation_medium", "provider_prompt_ids"]
+      },
+      "uniqueItems": true
+    },
+    "shot_ids": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "output_artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 }
+        },
+        "required": ["artifact_id", "version"]
+      },
+      "uniqueItems": true
+    },
+    "receipt_ids": { "type": "array", "items": { "type": "string", "pattern": "^RCP-" }, "uniqueItems": true },
+    "approval_required": { "type": "boolean" },
+    "approval_event_id": { "type": ["string", "null"] },
+    "resume_checkpoint_id": { "type": ["string", "null"], "pattern": "^CHK-" },
+    "blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "task_scope": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "minLength": 1 },
+    "updated_at": { "type": "string", "minLength": 1 }
+  },
+  "required": [
+    "task_id", "domain", "task_type", "execution_route", "status", "depends_on_task_ids",
+    "input_artifact_refs", "required_decision_ids", "provider_registry_ids", "master_prompt_ids",
+    "provider_neutral_draft_ids", "provider_prompt_ids", "output_artifact_refs", "receipt_ids", "approval_required",
+    "approval_event_id", "resume_checkpoint_id", "blocking_issue_ids", "task_scope",
+    "created_at", "updated_at"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "SIMULATED_ONLY" } }, "required": ["status"] },
+      "then": { "properties": { "execution_route": { "const": "SIMULATION" } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "BLOCKED" } }, "required": ["status"] },
+      "then": { "properties": { "blocking_issue_ids": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "approval_required": { "const": true } }, "required": ["approval_required"] },
+      "then": { "properties": { "approval_event_id": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_type": {
+            "enum": ["IMAGE_GENERATION", "VIDEO_GENERATION", "IMAGE_TO_VIDEO", "VIDEO_TO_VIDEO"]
+          }
+        },
+        "required": ["task_type"]
+      },
+      "then": {
+        "required": ["generation_targets", "shot_ids"],
+        "properties": { "generation_targets": { "minItems": 1 } }
+      }
+    }
+  ]
+}

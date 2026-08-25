@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TTSCoverageRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "coverage_id": { "type": "string", "pattern": "^TTS-" },
+    "source_spec_version": { "type": "string", "minLength": 1 },
+    "scope_shot_plan_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^SP-" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "scope_dialogue_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^DLG-" },
+      "uniqueItems": true
+    },
+    "covered_dialogue_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^DLG-" },
+      "uniqueItems": true
+    },
+    "tts_coverage_status": { "enum": ["NOT_APPLICABLE", "NONE", "PARTIAL", "FULL"] },
+    "dialogue_audio_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "dialogue_id": { "type": "string", "pattern": "^DLG-" },
+          "artifact_id": { "type": "string", "minLength": 1 },
+          "artifact_version": { "type": "string", "minLength": 1 },
+          "measured_duration_seconds": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+        },
+        "required": [
+          "dialogue_id", "artifact_id", "artifact_version", "measured_duration_seconds"
+        ]
+      }
+    },
+    "measurement_coverage_status": { "enum": ["NONE", "PARTIAL", "FULL"] },
+    "measured_dialogue_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^DLG-" },
+      "uniqueItems": true
+    },
+    "measured_duration_seconds": { "type": ["number", "null"], "minimum": 0 },
+    "output_artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 }
+        },
+        "required": ["artifact_id", "version"]
+      },
+      "uniqueItems": true
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^E-" },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "coverage_id", "source_spec_version", "scope_shot_plan_ids",
+    "scope_dialogue_ids", "covered_dialogue_ids", "tts_coverage_status",
+    "dialogue_audio_bindings", "measurement_coverage_status", "measured_dialogue_ids",
+    "measured_duration_seconds", "output_artifact_refs", "evidence_ids"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "tts_coverage_status": { "enum": ["NOT_APPLICABLE", "NONE"] } },
+        "required": ["tts_coverage_status"]
+      },
+      "then": {
+        "properties": {
+          "covered_dialogue_ids": { "maxItems": 0 },
+          "dialogue_audio_bindings": { "maxItems": 0 },
+          "output_artifact_refs": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "tts_coverage_status": { "enum": ["PARTIAL", "FULL"] } },
+        "required": ["tts_coverage_status"]
+      },
+      "then": {
+        "properties": {
+          "covered_dialogue_ids": { "minItems": 1 },
+          "dialogue_audio_bindings": { "minItems": 1 },
+          "output_artifact_refs": { "minItems": 1 }
+        }
+      }
+    }
+  ]
+}

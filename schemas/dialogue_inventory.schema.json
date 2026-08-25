@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DialogueInventoryEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "dialogue_id": { "type": "string", "pattern": "^DLG-" },
+    "shot_plan_id": { "type": "string", "pattern": "^SP-" },
+    "shot_id": { "type": "string", "minLength": 1 },
+    "speaker_asset_id": { "type": ["string", "null"] },
+    "text": { "type": "string", "minLength": 1 },
+    "language": { "type": "string", "minLength": 2 },
+    "tts_required": { "type": "boolean" },
+    "subtitle_required": { "type": "boolean" },
+    "source_spec_version": { "type": "string", "minLength": 1 }
+  },
+  "required": [
+    "dialogue_id", "shot_plan_id", "shot_id", "speaker_asset_id", "text",
+    "language", "tts_required", "subtitle_required", "source_spec_version"
+  ]
+}

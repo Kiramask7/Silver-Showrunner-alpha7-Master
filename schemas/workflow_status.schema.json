@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WorkflowStatus",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "spec_status": {
+      "enum": ["SPEC_DRAFT", "SPEC_READY"]
+    },
+    "execution_status": {
+      "enum": ["NOT_EXECUTED", "EXECUTION_PENDING", "EXECUTING", "EXECUTED_FAILED", "EXECUTED_SUCCEEDED", "SIMULATED_ONLY"]
+    },
+    "observation_status": {
+      "enum": ["NOT_APPLICABLE", "OBSERVATION_PENDING", "OBSERVED"]
+    },
+    "qa_status": {
+      "enum": ["NOT_APPLICABLE", "QA_NOT_EXECUTED", "QA_FAILED", "QA_PASSED", "QA_ACCEPTED_WITH_DEBT"]
+    },
+    "publication_status": {
+      "enum": ["NOT_PLANNED", "RELEASE_NOT_READY", "RELEASE_READY", "PUBLISH_PENDING", "PUBLISHED", "PUBLICATION_FAILED"]
+    },
+    "learning_status": {
+      "enum": ["NO_REAL_DATA", "DATA_COLLECTION_PENDING", "DATA_AVAILABLE", "LEARNING_DRAFT", "LEARNING_VALIDATED"]
+    },
+    "status_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "execution_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "observation_ids": { "type": "array", "items": { "type": "string", "pattern": "^OBS-" }, "uniqueItems": true },
+        "qa_gate_ids": { "type": "array", "items": { "type": "string", "pattern": "^G-" }, "uniqueItems": true },
+        "release_gate_ids": { "type": "array", "items": { "type": "string", "pattern": "^G-" }, "uniqueItems": true },
+        "publication_ids": { "type": "array", "items": { "type": "string", "pattern": "^PUB-" }, "uniqueItems": true },
+        "learning_ids": { "type": "array", "items": { "type": "string", "pattern": "^L-" }, "uniqueItems": true }
+      },
+      "required": ["execution_artifact_ids", "observation_ids", "qa_gate_ids", "release_gate_ids", "publication_ids", "learning_ids"]
+    }
+  },
+  "required": [
+    "spec_status",
+    "execution_status",
+    "observation_status",
+    "qa_status",
+    "publication_status",
+    "learning_status",
+    "status_basis"
+  ]
+}

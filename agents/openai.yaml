@@ -1,0 +1,7 @@
+interface:
+  display_name: "Silver-Showrunner-alpha.7-Master v1.1.3"
+  short_description: "以人工智能漫剧为核心的视听总导演与制作编排工具"
+  default_prompt: "请使用 $silver-showrunner 处理这个项目。不只会生成画面：我们让人工智能先学会当总导演。请判断我提供的是创意、文学原作、剧本、专业参考还是已有制作素材，从当前真实进度分阶段推进；交付可审阅的导演方案、逐镜执行稿与可复制提示词，区分原始内容、导演提案、文字方案和实际结果，没有真正制作或检查的素材不要写成已经完成。"
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RepairRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "repair_id": { "type": "string", "pattern": "^R-" },
+    "failure_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+    "root_cause": { "type": "string", "minLength": 1 },
+    "diagnostic_evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "minItems": 1, "uniqueItems": true },
+    "selected_method": {
+      "enum": ["TRIM", "RETIME", "EDIT", "CUTAWAY", "INSERT", "PICKUP", "PROMPT_PATCH", "LOCAL_REGEN", "FULL_REGEN", "OTHER"]
+    },
+    "selection_rationale": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["REPAIR_PLANNED", "REPAIR_EXECUTION_PENDING", "REPAIR_EXECUTED", "REPAIR_VERIFIED", "REPAIR_FAILED"] },
+    "source_artifact_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+    "new_artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "new_observation_ids": { "type": "array", "items": { "type": "string", "pattern": "^OBS-" }, "uniqueItems": true },
+    "re_evaluated_gate_ids": { "type": "array", "items": { "type": "string", "pattern": "^G-" }, "uniqueItems": true },
+    "closure_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "new_artifact_id": { "type": "string", "minLength": 1 },
+          "new_observation_id": { "type": "string", "pattern": "^OBS-" },
+          "re_evaluated_gate_id": { "type": "string", "pattern": "^G-" }
+        },
+        "required": ["new_artifact_id", "new_observation_id", "re_evaluated_gate_id"]
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "repair_id", "failure_ids", "root_cause", "diagnostic_evidence_ids", "selected_method",
+    "selection_rationale", "status", "source_artifact_ids", "new_artifact_ids",
+    "new_observation_ids", "re_evaluated_gate_ids", "closure_links"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "enum": ["REPAIR_EXECUTED", "REPAIR_VERIFIED"] } }, "required": ["status"] },
+      "then": { "properties": { "new_artifact_ids": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "REPAIR_VERIFIED" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "new_observation_ids": { "minItems": 1 },
+          "re_evaluated_gate_ids": { "minItems": 1 },
+          "closure_links": { "minItems": 1 }
+        }
+      }
+    }
+  ]
+}

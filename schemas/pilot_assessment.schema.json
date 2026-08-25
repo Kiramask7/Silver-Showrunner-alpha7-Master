@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PilotAssessment",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "pilot_id": { "type": "string", "pattern": "^PIL-" },
+    "scope": { "type": "string", "minLength": 1 },
+    "source_spec_version": { "type": "string", "minLength": 1 },
+    "shot_plan_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "asset_ids": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "prompt_ids": { "type": "array", "items": { "type": "string", "pattern": "^PP-" }, "minItems": 1, "uniqueItems": true },
+    "generation_targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target_type": { "enum": ["ASSET", "SHOT"] },
+          "target_id": { "type": "string", "minLength": 1 },
+          "source_spec_version": { "type": "string", "minLength": 1 },
+          "generation_role": {
+            "enum": [
+              "ASSET_REFERENCE", "ASSET_MOTION_REFERENCE", "SHOT_KEYFRAME", "SHOT_START_FRAME", "SHOT_END_FRAME",
+              "SHOT_MOTION", "SHOT_COMPOSITE_LAYER", "CUSTOM"
+            ]
+          },
+          "generation_medium": { "enum": ["IMAGE", "VIDEO"] },
+          "provider_prompt_ids": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^PP-" },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "target_type", "target_id", "source_spec_version", "generation_role",
+          "generation_medium", "provider_prompt_ids"
+        ]
+      }
+    },
+    "format_variant_ids": { "type": "array", "items": { "type": "string", "pattern": "^FMT-" }, "minItems": 1, "uniqueItems": true },
+    "task_types": {
+      "type": "array",
+      "items": { "enum": ["IMAGE_GENERATION", "VIDEO_GENERATION", "IMAGE_TO_VIDEO", "VIDEO_TO_VIDEO", "AUDIO", "COMPOSITING", "PACKAGING", "OTHER"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provider_registry_ids": { "type": "array", "items": { "type": "string", "pattern": "^PRV-" }, "minItems": 1, "uniqueItems": true },
+    "artifact_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "observation_ids": { "type": "array", "items": { "type": "string", "pattern": "^OBS-" }, "uniqueItems": true },
+    "core_comprehension_chain": { "type": "array", "items": { "type": "string" }, "minItems": 2 },
+    "unprompted_retell": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": { "const": true },
+        "protocol": { "type": "string", "minLength": 1 },
+        "sample_quantity_id": { "type": ["string", "null"], "pattern": "^QTY-" },
+        "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true }
+      },
+      "required": ["required", "protocol", "sample_quantity_id", "evidence_ids"]
+    },
+    "status": { "enum": ["PLANNED", "EXECUTED", "PASSED", "FAILED", "INCONCLUSIVE"] },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "uniqueItems": true }
+  },
+  "required": [
+    "pilot_id", "scope", "source_spec_version", "shot_plan_ids", "asset_ids", "prompt_ids",
+    "generation_targets", "format_variant_ids", "task_types", "provider_registry_ids", "artifact_ids", "observation_ids",
+    "core_comprehension_chain", "unprompted_retell", "status", "evidence_ids"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "enum": ["EXECUTED", "PASSED", "FAILED", "INCONCLUSIVE"] } }, "required": ["status"] },
+      "then": { "properties": { "artifact_ids": { "minItems": 1 }, "observation_ids": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "PASSED" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "evidence_ids": { "minItems": 1 },
+          "unprompted_retell": { "properties": { "evidence_ids": { "minItems": 1 } } }
+        }
+      }
+    }
+  ]
+}

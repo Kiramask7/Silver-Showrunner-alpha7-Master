@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PublicationRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "publication_id": { "type": "string", "pattern": "^PUB-" },
+    "platform": { "type": "string", "minLength": 1 },
+    "content_or_post_id": { "type": "string", "minLength": 1 },
+    "url": { "type": "string", "minLength": 1 },
+    "artifact_id": { "type": "string", "minLength": 1 },
+    "artifact_version": { "type": "string", "minLength": 1 },
+    "release_package_id": { "type": "string", "minLength": 1 },
+    "release_readiness_gate_id": { "type": "string", "pattern": "^G-" },
+    "published_at": { "type": "string", "minLength": 1 },
+    "visibility": { "enum": ["PUBLIC", "UNLISTED", "PRIVATE", "REMOVED", "UNKNOWN"] },
+    "actual_labels_and_metadata": { "type": "object" },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-" }, "minItems": 1, "uniqueItems": true },
+    "checked_at": { "type": "string", "minLength": 1 }
+  },
+  "required": [
+    "publication_id", "platform", "content_or_post_id", "url", "artifact_id", "artifact_version",
+    "release_package_id", "release_readiness_gate_id", "published_at", "visibility", "actual_labels_and_metadata", "evidence_ids", "checked_at"
+  ]
+}

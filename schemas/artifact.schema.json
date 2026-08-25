@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Artifact",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "type": { "type": "string", "minLength": 1 },
+    "artifact_class": { "enum": ["TEXT_SPEC", "MEDIA", "DATA", "PACKAGE", "RELEASE", "BENCHMARK_ONLY"] },
+    "status": {
+      "enum": [
+        "SPEC_DRAFT", "SPEC_READY", "TEXT_SPEC_COMPLETE", "USER_APPROVED", "MITIGATION_PLANNED",
+        "EXECUTION_PENDING", "SIMULATED_EXTERNAL_STEP", "REAL_ARTIFACT_AVAILABLE", "OBSERVATION_PENDING",
+        "OBSERVED", "QA_NOT_EXECUTED", "VALIDATED", "LOCKED", "REPAIR_PLANNED", "ACCEPTED_WITH_DEBT",
+        "SIMULATED_ONLY", "BLOCKED", "DEPRECATED"
+      ]
+    },
+    "real_artifact_present": { "type": "boolean" },
+    "content_locator": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "uri": { "type": "string", "minLength": 1 },
+        "media_type": { "type": "string", "minLength": 1 },
+        "sha256": { "type": ["string", "null"], "pattern": "^[A-Fa-f0-9]{64}$" }
+      },
+      "required": ["uri", "media_type", "sha256"]
+    },
+    "version": { "type": "string" },
+    "dependencies": { "type": "array" },
+    "approval_event_id": { "type": ["string", "null"] },
+    "evidence_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "lock_event_id": { "type": ["string", "null"] },
+    "open_blocking_issue_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "execution_mode": { "enum": ["REAL", "SIMULATION"] },
+    "protected_unknown_ids": { "type": "array", "items": { "type": "string", "pattern": "^U-" }, "uniqueItems": true },
+    "quantity_ids": { "type": "array", "items": { "type": "string", "pattern": "^QTY-" }, "uniqueItems": true },
+    "causal_boundary_ids": { "type": "array", "items": { "type": "string", "pattern": "^CB-" }, "uniqueItems": true },
+    "benchmark_case_id": { "type": ["string", "null"], "pattern": "^BM-" },
+    "source_atom_ids": {
+      "type": "array", "items": { "type": "string", "pattern": "^SRC[0-9]{4,}$" }, "minItems": 1, "uniqueItems": true
+    },
+    "source_atom_inventory_sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" }
+  },
+  "required": [
+    "id", "type", "artifact_class", "status", "real_artifact_present", "evidence_ids",
+    "open_blocking_issue_ids", "execution_mode", "protected_unknown_ids", "quantity_ids",
+    "causal_boundary_ids", "benchmark_case_id"
+  ],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "USER_APPROVED" } }, "required": ["status"] },
+      "then": { "required": ["approval_event_id"], "properties": { "approval_event_id": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": { "properties": { "artifact_class": { "const": "TEXT_SPEC" } }, "required": ["artifact_class"] },
+      "then": {
+        "required": ["content_locator", "version"],
+        "properties": {
+          "artifact_class": { "const": "TEXT_SPEC" },
+          "real_artifact_present": { "const": true },
+          "content_locator": {
+            "type": "object",
+            "properties": {
+              "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" }
+            }
+          },
+          "version": { "type": "string", "minLength": 1 },
+          "execution_mode": { "const": "REAL" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "enum": ["REAL_ARTIFACT_AVAILABLE", "OBSERVED", "VALIDATED", "LOCKED"] } }, "required": ["status"] },
+      "then": {
+        "required": ["content_locator", "version"],
+        "properties": {
+          "real_artifact_present": { "const": true },
+          "content_locator": { "type": "object" },
+          "version": { "type": "string", "minLength": 1 },
+          "evidence_ids": { "minItems": 1 },
+          "execution_mode": { "const": "REAL" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "LOCKED" } }, "required": ["status"] },
+      "then": {
+        "required": ["lock_event_id"],
+        "properties": {
+          "lock_event_id": { "type": "string", "minLength": 1 },
+          "open_blocking_issue_ids": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "execution_mode": { "const": "SIMULATION" } }, "required": ["execution_mode"] },
+      "then": {
+        "not": { "properties": { "status": { "enum": ["OBSERVED", "VALIDATED", "LOCKED"] } }, "required": ["status"] }
+      }
+    },
+    {
+      "if": { "properties": { "artifact_class": { "const": "BENCHMARK_ONLY" } }, "required": ["artifact_class"] },
+      "then": { "properties": { "benchmark_case_id": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "enum": ["longform_source_atom_registry", "longform_prompt_source_trace"] }
+        },
+        "required": ["type"]
+      },
+      "then": { "required": ["source_atom_ids", "source_atom_inventory_sha256"] }
+    }
+  ]
+}
